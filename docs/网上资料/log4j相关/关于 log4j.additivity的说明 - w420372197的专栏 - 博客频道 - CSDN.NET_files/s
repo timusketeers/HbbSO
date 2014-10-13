@@ -1,0 +1,11 @@
+ADFHOST1136="http://csdnim.allyes.com";
+ADFCID1136=15;
+ADFBID1136=1136;
+ADFLOC='CNSH0000';
+ADFUSER1136="http://csdnim.allyes.com/main/adfclick?d=csdnim&i=z15,10063269,1136,5060&rf=&a=deAY3gVmc2A5yGQ7EMXSdJxPQ&u=";
+ALLYESID4="07DCBAAE917C5082";
+ADFPGC="2,5,15,0,1389,1136,5060,10063269";
+
+document.write("\n");
+document.write("<script id=\"c55cb88f428db3438c2ff9b1b3a8962d:101\" type=\"text/javascript\" src=\"http://istc.instreet.cn/widget/permanent?field=c55cb88f428db3438c2ff9b1b3a8962d:101\" charset=\"utf-8\"></Scr"+"ipt>");
+

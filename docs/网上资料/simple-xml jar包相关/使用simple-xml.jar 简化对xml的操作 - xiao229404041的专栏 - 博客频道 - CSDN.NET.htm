@@ -1,0 +1,959 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0058)http://blog.csdn.net/xiao229404041/article/details/6629725 -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <script type="text/javascript" async="" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ga.js"></script><script id="allmobilize" charset="utf-8" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/allmobilize.min.js"></script><style type="text/css"></style>
+ <meta http-equiv="Cache-Control" content="no-siteapp"><link rel="alternate" media="handheld" href="http://blog.csdn.net/xiao229404041/article/details/6629725#">
+
+    <title>使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏
+        - 博客频道 - CSDN.NET</title>
+    
+    <meta name="description" content="Java™ 开发人员在序列化和反序列化可扩展标记语言（Extensible Markup Language，XML）对象时有多种不同的选择。Simple 就是这样的一个例子，并且它有很多超越其他竞争方案的优势。本文概要介绍如何在 XML 通信系统中使用 Simple。Simple">
+    <script src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/jquery.js" type="text/javascript"></script>
+    <script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ad.js"></script>
+        <!--new top-->
+       
+        <link rel="stylesheet" href="http://static.csdn.net/public/common/toolbar/css/index.css">
+        <!--new top-->
+
+    <link rel="Stylesheet" type="text/css" href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/style.css">
+    <link id="RSSLink" title="RSS" type="application/rss+xml" rel="alternate" href="http://blog.csdn.net/xiao229404041/rss/list">
+    <link rel="shortcut icon" href="http://csdnimg.cn/public/favicon.ico">
+    <link type="text/css" rel="stylesheet" href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/default.css">
+ 
+
+
+<script src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/share.js"></script><script type="text/javascript" charset="utf-8" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/tracking.js"></script><script type="text/javascript" charset="utf-8" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/main.js"></script><link href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/bdsstyle.css" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/style(1).css"><link type="text/css" rel="stylesheet" href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/style(2).css"><script src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/logger.js"></script><link rel="stylesheet" href="http://bdimg.share.baidu.com/static/api/css/share_style0_16.css?v=89a7173d.css"></head>
+<body><iframe style="display: none; " frameborder="0"></iframe>
+    
+   
+      <!--new top-->
+    <script id="toolbar-tpl-scriptId" fixed="true" prod="blog" skin="black" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/html.js" type="text/javascript"></script><div class="csdn-toolbar csdn-toolbar-skin-black ">        <div class="container row center-block ">          <div class="col-md-3 pull-left logo clearfix"><a href="http://www.csdn.net/?ref=toolbar" title="CSDN首页" target="_blank" class="icon"></a><a title="频道首页" href="http://blog.csdn.net/?ref=toolbar_logo" target="_blank" class="img blog-icon"></a></div>          <div class="pull-right login-wrap unlogin">            <ul class="btns">              <li class="loginlink"><a href="https://passport.csdn.net/account/login?ref=toolbar" target="_top">登录&nbsp;</a>|<a target="_top" href="https://passport.csdn.net/account/register?ref=toolbar">&nbsp;注册</a></li>              <li class="search">                <div class="icon on-search-icon">                  <div class="wrap">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <form action="http://so.csdn.net/search" method="get" target="_blank">                      <input type="hidden" value="toolbar" name="ref" accesskey="2">                      <div class="border">                        <input placeholder="搜索" type="text" value="" name="q" accesskey="2"><span class="icon-enter-sm"></span>                      </div>                    </form>                  </div>                </div>              </li>              <li class="favor">                <div class="icon on-favor-icon">                  <div class="wrap">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <div style="display:none;" class="favor-success"><span class="msg">收藏成功</span>                      <div class="btns"><span class="btn btn-primary ok">确定</span></div>                    </div>                    <div style="display:none;" class="favor-failed"><span class="icon-danger-lg"></span><span class="msg">收藏失败，请重新收藏</span>                      <div class="btns"><span class="btn btn-primary ok">确定</span></div>                    </div>                    <form role="form" class="form-horizontal favor-form">                      <div class="form-group">                        <div class="clearfix">                          <label for="input-title" class="col-sm-2 control-label">标题</label>                          <div class="col-sm-10">                            <input id="inputTitle" type="text" placeholder="" class="title form-control">                          </div>                        </div>                        <div class="alert alert-danger"><strong></strong>标题不能为空</div>                      </div>                      <div class="form-group">                        <label for="input-url" class="col-sm-2 control-label">网址</label>                        <div class="col-sm-10">                          <input id="input-url" type="text" placeholder="" class="url form-control">                        </div>                      </div>                      <div class="form-group">                        <label for="input-tag" class="col-sm-2 tag control-label">标签</label>                        <div class="col-sm-10">                          <input id="input-tag" type="text" class="form-control tag">                        </div>                      </div>                      <div class="form-group">                        <label for="input-description" class="description col-sm-2 control-label">摘要</label>                        <div class="col-sm-10">                          <textarea id="input-description" class="form-control description"></textarea>                        </div>                      </div>                      <div class="form-group">                        <div class="col-sm-offset-2 col-sm-10 ft">                          <div class="col-sm-4 pull-left">                            <div class="checkbox">                              <label>                                <input type="checkbox" name="share" checked="checked" class="share">公开                              </label>                            </div>                          </div>                          <div class="col-sm-8 pull-right favor-btns">                            <button type="button" class="cancel btn btn-default">取消</button>                            <button type="submit" class="submit btn btn-primary">收藏</button>                          </div>                        </div>                      </div>                    </form>                  </div>                </div>              </li>              <li class="notify">                <div style="display:none" class="number"></div>                <div style="display:none" class="icon-hasnotes-sm"></div>                <div id="header_notice_num"></div>                <div class="icon on-notify-icon">                  <div class="wrap">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <div id="note1" class="csdn_note">                      <div class="box"></div>                    <iframe src="about:block" frameborder="0" allowtransparency="true" style="z-index:-1;position:absolute;top:0;left:0;width:100%;height:100%;background:transparent"></iframe></div>                  </div>                </div>              </li>              <li class="ugc">                <div class="icon on-ugc-icon">                  <div class="wrap clearfix">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <dl>                      <dt><a href="http://geek.csdn.net/news/expert?ref=toolbar" target="_blank" class="p-news clearfix"><em class="icon"></em><span>分享资讯</span></a></dt>                      <dt><a href="http://share.csdn.net/slides/new?ref=toolbar" target="_blank" class="p-doc clearfix"><em class="icon"></em><span>传PPT/文档</span></a></dt>                      <dt><a href="http://bbs.csdn.net/topics/new?ref=toolbar" target="_blank" class="p-ask clearfix"><em class="icon"></em><span>提问题</span></a></dt>                      <dt><a href="http://write.blog.csdn.net/postedit?ref=toolbar" target="_blank" class="p-blog clearfix"><em class="icon"></em><span>写博客</span></a></dt>                      <dt><a href="http://u.download.csdn.net/upload?ref=toolbar" target="_blank" class="p-src clearfix"><em class="icon"></em><span>传资源</span></a></dt>                      <dt><a href="https://code.csdn.net/projects/new?ref=toolbar" target="_blank" class="c-obj clearfix"><em class="icon"></em><span>创建项目</span></a></dt>                      <dt><a href="https://code.csdn.net/snippets/new?ref=toolbar" target="_blank" class="c-code clearfix"><em class="icon"></em><span>创建代码片</span></a></dt>                    </dl>                  </div>                </div>              </li>              <li class="profile">                <div class="icon on-profile-icon"><img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/100x100.jpg" class="curr-icon-img">                  <div class="wrap clearfix">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <div class="bd">                      <dl class="clearfix">                        <dt class="pull-left img"><a target="_blank" href="http://my.csdn.net/?ref=toolbar" class="avatar"><img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/100x100.jpg"></a></dt>                        <dd class="info"><a target="_blank" href="http://my.csdn.net/?ref=toolbar" class="nickname"></a><a class="set-nick" href="https://passport.csdn.net/account/profile">设置昵称<span class="write-icon"></span></a><span class="dec"><a class="fill-dec" href="http://my.csdn.net/" target="_blank">编辑自我介绍，让更多人了解你<span class="write-icon"></span></a></span></dd>                      </dl>                    </div>                    <div class="ft clearfix"><a target="_blank" href="http://my.csdn.net/my/account/changepwd?ref=toolbar" class="pull-left"><span class="icon-cog"></span>帐号设置</a><a href="https://passport.csdn.net/account/logout?ref=toolbar" target="_top" class="pull-right "><span class="icon-signout"></span><span class="out">退出</span></a></div>                  </div>                </div>              </li>              <li class="apps">                <div class="icon on-apps-icon">                  <div class="wrap clearfix">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                  <div class="detail">                    <dl>                      <dt>                        <h5>社区</h5>                      </dt>                      <dd> <a href="http://blog.csdn.net/?ref=toolbar" target="_blank">博客</a></dd>                      <dd> <a href="http://bbs.csdn.net/?ref=toolbar" target="_blank">论坛</a></dd>                      <dd> <a href="http://download.csdn.net/?ref=toolbar" target="_blank">下载</a></dd>                      <dd><a href="http://share.csdn.net/?ref=toolbar" target="_blank">Share</a></dd>                      <dd><a href="http://geek.csdn.net/?ref=toolbar" target="_blank">极客头条</a></dd>                    </dl>                  </div>                  <div class="detail">                    <dl>                      <dt>                        <h5>服务</h5>                      </dt>                      <dd> <a href="https://code.csdn.net/?ref=toolbar" target="_blank">CODE</a></dd>                      <dd> <a href="http://hero.csdn.net/?ref=toolbar" target="_blank">英雄会</a></dd>                      <dd> <a href="http://huiyi.csdn.net/?ref=toolbar" target="_blank">活动</a></dd>                      <dd> <a href="http://www.csto.com/?ref=toolbar" target="_blank">CSTO</a></dd>                    </dl>                  </div>                  <div class="detail last">                    <dl>                      <dt>                        <h5>俱乐部</h5>                      </dt>                      <dd> <a href="http://cto.csdn.net/?ref=toolbar" target="_blank">CTO俱乐部</a></dd>                      <dd> <a href="http://student.csdn.net/?ref=toolbar" target="_blank">高校俱乐部</a></dd>                    </dl>                  </div>                </div>              </div>            </li>            </ul>          </div>        </div>    </div>
+     <!--new top-->
+    <div id="container">
+        <div id="header">
+    <div class="header">
+        <div id="blog_title">
+            <h2>
+                <a href="http://blog.csdn.net/xiao229404041">xiao229404041的专栏</a></h2>
+            <h3></h3>
+            <div class="clear">
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div id="navigator">
+    <div class="navigator_bg">
+    </div>
+    <div class="navigator">
+        <ul>
+                <li id="btnContents"><a href="http://blog.csdn.net/xiao229404041?viewmode=contents"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_mulu&#39;])">
+                    <img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ico_list.gif">目录视图</span></a></li>
+                <li id="btnView"><a href="http://blog.csdn.net/xiao229404041?viewmode=list"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_zhaiyao&#39;])">
+                    <img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ico_summary.gif">摘要视图</span></a></li>
+                <li id="btnRss"><a href="http://blog.csdn.net/xiao229404041/rss/list"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_RSS&#39;])">
+                    <img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ico_rss.gif">订阅</span></a></li>                
+
+            </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    var username = "xiao229404041";
+    var _blogger = username;
+    var blog_address = "http://blog.csdn.net/xiao229404041";
+    var static_host = "http://static.blog.csdn.net";
+    var currentUserName = "";  
+</script>
+
+        <div id="body">
+            <div id="main">
+                <div class="main">
+                        <div class="ad_class">
+<div class="notice tracking-ad" data-mod="popu_3"> 
+
+<a href="http://blog.csdn.net/blogdevteam/article/details/38514369" target="_blank">
+<font color="blue">7月推荐文章
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://bbs.csdn.net/topics/390863850" target="_blank">
+<font color="red">【限时活动】建专辑得大奖</font></a>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://www.csdn.net/article/2014-08-25/2821359" target="_blank">
+<font color="blue">专访张路斌：从HTML5到Unity的游戏开发之路
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="http://blog.csdn.net/blogdevteam/article/details/38657235" target="_blank"><font color="red">当青春遇上互联网，能否点燃你的创业梦
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="http://blog.csdn.net/blogdevteam/article/details/38418263" target="_blank">
+<font color="blue">推荐有礼--找出您心中的技术大牛
+</font></a>
+
+
+</div>                        </div>
+                        
+
+  
+<link href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/comment1.css" type="text/css" rel="stylesheet">
+<link href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/style1.css" type="text/css" rel="stylesheet">
+<script language="JavaScript" type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/jquery.cookie.js"></script>
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/main(1).js"></script>
+<div id="article_details" class="details">
+    <div class="article_title">   
+         <span class="ico ico_type_Original"></span>
+
+
+    <h1>
+        <span class="link_title"><a href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET.htm">
+        使用simple-dml.jar 简化对xml的操作
+        </a></span>
+    </h1>
+</div>
+
+    <div class="article_manage">
+    <span class="link_postdate">2011-07-24 15:53</span>
+    <span class="link_view" title="阅读次数">408人阅读</span>
+    <span class="link_comments" title="评论次数"><a href="http://blog.csdn.net/xiao229404041/article/details/6629725#comments" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_pinglun&#39;])">评论</a>(0)</span>
+    <span class="link_collect"><a href="javascript:void(0);" onclick="javascript:_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_shoucang&#39;]);collectArticle(&#39;使用simple-dml.jar 简化对xml的操作&#39;,&#39;6629725&#39;);return false;" title="收藏">收藏</a></span>
+    <span class="link_report"><a href="http://blog.csdn.net/xiao229404041/article/details/6629725#report" onclick="javascript:_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_jubao&#39;]);report(6629725,2);return false;" title="举报">举报</a></span>
+    
+</div>
+<div class="tag2box"><a href="http://www.csdn.net/tag/xml" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">xml</a><a href="http://www.csdn.net/tag/string" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">string</a><a href="http://www.csdn.net/tag/accessor" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">accessor</a><a href="http://www.csdn.net/tag/%e6%96%87%e6%a1%a3" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">文档</a><a href="http://www.csdn.net/tag/file" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">file</a><a href="http://www.csdn.net/tag/exception" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">exception</a></div>
+
+  
+    
+<div id="article_content" class="article_content">
+&nbsp;<p>Java™ 开发人员在序列化和反序列化可扩展标记语言（Extensible Markup Language，XML）对象时有多种不同的选择。Simple 就是这样的一个例子，并且它有很多超越其他竞争方案的优势。本文概要介绍如何在 XML 通信系统中使用 Simple。</p><p>Simple 是一个 Java 框架，用于简化序列化和反序列化 XML 的过程。使用 Simple，开发人员可以简化（名字由此而来）将简单老 Java 对象（POJO）转换成 XML 文档的过程 — 即所谓的<em>序列化 （serialization）</em>过程。Simple 也可促进相反的过程：开发人员可以将 XML 文档转换成 POJO — 即所谓的<em>反 序列化（deserialization）</em>过程。</p><p>Simple 名副其实，它使用注解来支持序列化和反序列化过程。根据相应的 XML 文档应该如何出现，对 POJO 进行注解。一些字段被注解为属性，另一些字段被注解为元素。类通常被注解为根元素。在序列化过程中，该框架处理冗长的解释注解和产生相应 XML 文档的过程。无足为奇，在 XML 文档被转换成 POJO 的反序列化过程中，注解也会被解释。</p><p>使用 Simple 有几个优势。首先，它促进快速应用程序开发。Simple 是如此简单，它支持开发人员快速实现健壮的、使用 XML 序列化和反序列化的应用程序，无需完成长长的学习曲线以及付出繁重的开发劳动。</p><p>其次，Simple 不需要配置。前面已经提到，Simple 使用注解。这些注解取代了基于 XML 的配置文件（其他框架一般都有这样的配置文件）。</p><p>最后，Simple 只让使用它的应用程序增加少量的内存占用。Java 归档（Java Archive，JAR）文件只有 239 KB。Simple 也不依赖于一系列其他 JAR 文件，而其他框架则通常不是这样的。</p><p><a name="usingsimple"><span class="atitle">获得 Simple</span></a></p><p>必须首先访问 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#resources">参 考资源</a> 中列出的 Simple 网站下载归档文件，获得 Simple，然后才能使用它。但是关于这个过程，既有好消息，也有坏消息。好消息是，归档文件是免费的。坏消息是，归档文件是 .tar.gz 格式的。所以，您若是想用 Microsoft® Windows® 本机归档文件解压程序来打开这个归档文件的话，是会失望的。需要使用 WinZip 或其他类似的归档工具。</p><p>解压文件之后，注意在 jar 目录中有一个 JAR 文件（simple-xml-2.1.4.jar）。在编译时和运行时，类路径中需要有这个 JAR 文件。</p><p><a name="serializing"><span class="atitle">序列化</span></a></p><p>将一个对象序列化成一个 XML 文档是一个相当简单的过程。涉及到两步：</p><ol><li>创建具有适当注解的 POJO。 </li><li>编写不多的几行代码，用于真正执行序列化过程。 </li></ol><p>为了本文目的，我们来回顾一下熟悉的鱼饵主题（当然只有读过我的文章的读者熟悉）。所以，<a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing1">清 单 1</a> 是一个表示鱼饵信息的 POJO。</p><p><br><a name="listing1"><strong>清单 1. Lure 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+@Root
+public class Lure {
+
+     @Attribute
+     private String type;
+	
+     @Element
+     private String company;
+	
+     @Element
+     private int quantityInStock;
+	
+     @Element
+     private String model;
+
+     public String getType {
+		return type;
+     }
+
+     public void setType(String type) {
+          this.type = type;
+     }
+
+     public String getCompany {
+          return company;
+     }
+
+     public void setCompany(String company) {
+          this.company = company;
+     }
+
+     public int getQuantityInStock {
+          return quantityInStock;
+     }
+
+     public void setQuantityInStock(int quantityInStock) {
+          this.quantityInStock = quantityInStock;
+     }
+
+     public String getModel {
+          return model;
+     }
+
+     public void setModel(String model) {
+          this.model = model;
+     }
+}
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>这个 POJO 真的没有什么复杂的东西。其唯一可能初看起来不熟悉的部分是注解。同样，这是故意的。回想一下，Simple 框架的目的就是实现它名字的寓意。</p><p><code>@Root</code> 注解描述 XML 文档的根元素。因为每个 XML 文档都需要一个根元素，所以一定要记得包含这个元素。</p><p><code>type</code> 字段上面的 <code>@Attribute</code> 注解将该字段识别为属性。该属性被作为一个属性添加到根元素。</p><p>其余注解是 <code>@Element</code> 注解。这些注解位于以下 3 个字段的正上方：<code>company</code>、<code>quantityInStock</code> 和 <code>model</code>。这些字段代表 XML 文档中的元素。</p><p>根据 JavaBean 标准，该 POJO 的其余部分由访问器（accessor）方法和 修改器（mutator）方法组成。</p><p>既然 POJO 已经创建完成了，下面就该编写序列化代码了。参见 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing2">清 单 2</a> 中的该代码。</p><p><br><a name="listing2"><strong>清单 2. LureExample 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+public static void main(String[] args) {
+     try {
+          Serializer serializer = new Persister;
+          Lure lure = new Lure;
+          lure.setCompany("Donzai");
+          lure.setModel("Marlin Buster");
+          lure.setQuantityInStock(23);
+          lure.setType("Trolling");
+		
+          File result = new File("lure.xml");
+          serializer.write(lure, result);
+     } catch (Exception e) {
+          e.printStackTrace;
+     }
+}
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>第一件事就是实例化一个 <code>Persister</code> 对象。注意，该类是 Simple 框架的一部分，它实现 <code>Serializer</code> 接口。</p><p>接下来，实例化 <code>Lure</code> 对象并设置适当的字段。在本例中，制造鱼饵的公司名称是 <code>Donzai</code>， 模型的名字是 <code>Marlin Buster</code>，库存数量是 <code>23</code>。最后，鱼饵的类型是 <code>Trolling</code>。</p><p>再接下来，实例化一个 <code>File</code> 对象，它的名称是将成为 XML 文档的那个文件的名称。在本例中，该名称是 lure.xml。</p><p>最后，调用 serializer 来编写文件。<code>write</code> 方法中提供两个参数。第一个参数是 POJO，第二个参数是 <code>File</code> 对象。</p><p>现在可以执行该代码了。<a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing2">清 单 2</a> 是一个 Java 应用程序，所以您可以使用自己喜欢的集成开发环境 (IDE) 来运行它。确保 simple-xml-2.1.4.jar 在类路径中。如果使用的是 Eclipse，只需在文件上右击，选择 <strong>Run As</strong>，再从出现 的菜单中选择 <strong>Java Application</strong> 即可。</p><p>如果一切正常（应该如此 — 这很简单，是不是？），那么产生的 XML 文档应该类似于 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing3">清 单 3</a>。</p><p><br><a name="listing3"><strong>清单 3. LureExample 的输出</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+
+   Donzai
+   23
+   Marlin Buster
+
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>注意关于 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing3">清 单 3</a> 的几点。首先，注意 lure 类型是根元素的一个属性。这没有疑义，因为前面在 POJO 中是用 <code>@Attribute</code> 而不是 <code>@Element</code> 注解了 <code>type</code> 字段。</p><p>关于产生的 XML，另一个重点是元素名称遵循 JavaBean 标准。例如，根元素是 <code>lure</code>，尽管类名称 是 <code>Lure</code>。3 个子元素名称完全匹配字段名称。同样，这也是有意为之，因为您不想要首字母大写的根元素，而子元素名称则遵循另外的模式。</p><p><a name="deserializing"><span class="atitle">反序列化</span></a></p><p>序列化一个对象是如此地容易，那么反序列化对象也很容易，对不对？对！</p><p>回想一下，反序列化是将 XML 文档转换成 POJO 的过程。很不错的是，可以使用刚才创建的 XML 文档来进行反序列化。</p><p><a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing4">清 单 4</a> 展示了反序列化代码。</p><p><br><a name="listing4"><strong>清单 4. LureExample2 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+public static void main(String[] args) {
+     try {
+          Serializer serializer = new Persister;
+          File source = new File("lure.xml");
+          Lure lure = serializer.read(Lure.class, source);
+
+          System.out.println(lure.getCompany);
+          System.out.println(lure.getModel);
+          System.out.println(lure.getQuantityInStock);
+          System.out.println(lure.getType);
+     } catch (Exception e) {
+          e.printStackTrace;
+     }
+}
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>同样，首先是实例化一个实现 <code>Serializer</code> 接口的对象（<code>Persister</code>）。</p><p>另一个类似行是 <code>File</code> 对象的实例化。但是，这里有一个明显的不同。在 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing3">清 单 3</a> 中，是为一个不存在的文件实例化了 <code>File</code> 对象。此处假设（实际上必须这样）该文件已经存在。</p><p>接下来，通过从 <code>Serializer</code> 对象调用 <code>read</code> 方法，从而实例化 POJO。<code>read</code> 方法有两个参数：POJO 的类和 <code>File</code> 对象，后者代表包含数据的 XML 文件。</p><p>最后，从 POJO 输出所有的信息，确保所有内容都读取正确。</p><p>执行该代码时，输出应该类似于 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing5">清 单 5</a>。</p><p><br><a name="listing5"><strong>清单 5. LureExample2 的输出</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+Donzai
+Marlin Buster
+23
+Trolling
+</pre></td></tr></tbody></table><p>&nbsp;</p><p><a name="fulltree"><span class="atitle">全树序列化</span></a></p><p>至此，您所序列化和反序列化的 XML 文档都相当简单。</p><p>大多数 XML 文档要复杂多了。它们通常具有数层嵌套的元素，有时候还有一到多个重复的元素，每个元素又有几个子元素。</p><p>幸运的是，Simple 即使对于更复杂的文档也不违反它的名字的寓意。就像在一个 POJO 中嵌套又一个 POJO 那么简单。我们来看一下 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing6">清 单 6</a>。</p><p><br><a name="listing6"><strong>清单 6. AdvancedLure 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+@Attribute
+private String type;
+
+@Element
+private String company;
+	
+@Element
+private int quantityInStock;
+	
+@Element
+private String model;
+	
+@Element
+private ConfigurationScheme configurationScheme;
+</pre></td></tr></tbody></table><p>&nbsp;</p><p><a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing6">清 单 6</a> 中的 <code>AdvancedLure</code> 类非常类似于 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing1">清 单 1</a> 中描述的 <code>Lure</code> 类。一个例外之处是包含了另一个字段：<code>configurationScheme</code>。 配置方案由<em>另一个</em> POJO 表示，描述在 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing7">清 单 7</a> 中。</p><p><br><a name="listing7"><strong>清单 7. ConfigurationScheme 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+@Root
+public class ConfigurationScheme {
+	
+@Element
+private String color;
+	
+@Element
+private int size;
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>为节省篇幅，我舍去了 accessor 方法和 mutator 方法。</p><p><a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing7">清 单 7</a> 中的注解应该看起来很熟悉。它们与 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing1">清 单 1</a> 中使用的是相同的注解。</p><p>这又将我们引向 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing8">清 单 8</a>。</p><p><br><a name="listing8"><strong>清单 8. LureExample3 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+public static void main(String[] args) {
+     try {
+          Serializer serializer = new Persister;
+          AdvancedLure lure = new AdvancedLure;
+          lure.setCompany("Donzai");
+          lure.setModel("Marlin Buster");
+          lure.setQuantityInStock(23);
+          lure.setType("Trolling");
+			
+          ConfigurationScheme configurationScheme = new ConfigurationScheme;
+          configurationScheme.setColor("Blue");
+          configurationScheme.setSize(3);
+          lure.setConfigurationScheme(configurationScheme);
+			
+          File result = new File("advancedlure.xml");
+          serializer.write(lure, result);
+     } catch (Exception e) {
+          e.printStackTrace;
+     }
+}
+</pre></td></tr></tbody></table><p>&nbsp;</p><p><a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing8">清 单 8</a> 和 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing2">清 单 2</a> 之间最大的差别是，您在 <code>AdvancedLure</code> 对象中实例化了一个 <code>ConfigurationScheme</code> 对象并设置了适当的字段。</p><p>运行该代码，输出应该类似于 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing9">清 单 9</a>。</p><p><br><a name="listing9"><strong>清单 9. LureExample3 的输出</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+
+   Donzai
+   23
+   Marlin Buster
+   
+      Blue
+      3
+   
+
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>可以看到，嵌套的元素与预期那样地被序列化。</p><p><a name="enumerations"><span class="atitle">枚举</span></a></p><p>XML 文档经常包含某些元素的枚举。也就是说，相同的元素名称可以重复，只不过带有不同的子元素或属性数据而已。幸运的是，Simple 也能够处理这种情况。</p><p>为了演示该特性，我们创建一个新的类，名叫 <code>Inventory</code>，其中包含仓库（储存库存的地方）的名称和在该库 存位置找到的鱼饵的列表，如 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing10">清 单 10</a> 中所示。</p><p><br><a name="listing10"><strong>清单 10. Inventory 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+@Root
+public class Inventory {
+	
+     @ElementList
+     private List lures;
+	
+     @Attribute
+     private String warehouse;
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>注意，使用了一个新注解：<code>@ElementList</code>。该注解告诉 Simple 框架：相应的 <code>List</code> 对象代表 XML 元素的枚举。</p><p>用于演示该 POJO 的序列化的代码跟用于序列化更简单的 POJO（比如说 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing2">清 单 2</a> 中序列化的那个 POJO）的代码一样容易。唯一增加的复杂性来自于，为嵌套目的实例化了所有必需的对象。参见 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing11">清 单 11</a>。</p><p><br><a name="listing11"><strong>清单 11. LureExample4 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+Serializer serializer = new Persister;
+
+AdvancedLure lure = new AdvancedLure;
+lure.setCompany("Donzai");
+lure.setModel("Marlin Buster");
+lure.setQuantityInStock(23);
+lure.setType("Trolling");
+			
+ConfigurationScheme configurationScheme = new ConfigurationScheme;
+configurationScheme.setColor("Blue");
+configurationScheme.setSize(3);
+lure.setConfigurationScheme(configurationScheme);
+			
+			
+AdvancedLure lure2 = new AdvancedLure;
+lure2.setCompany("Ziggi");
+lure2.setModel("Tuna Finder");
+lure2.setQuantityInStock(44);
+lure2.setType("Trolling");
+		
+ConfigurationScheme configurationScheme2 = new ConfigurationScheme;
+configurationScheme2.setColor("Red");
+configurationScheme2.setSize(5);
+lure2.setConfigurationScheme(configurationScheme2);
+			
+List lures = new ArrayList;
+lures.add(lure);
+lures.add(lure2);
+			
+Inventory inventory = new Inventory;
+inventory.setLures(lures);
+inventory.setWarehouse("Midwest");
+			
+File result = new File("inventory.xml");
+
+serializer.write(inventory, result);
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>执行该代码时，会创建一个叫做 inventory.xml 的 XML 文件。该文件的内容应该类似于 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing12">清 单 12</a>。</p><p><br><a name="listing12"><strong>清单 12. LureExample4 的输出</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+
+   
+      
+         Donzai
+         23
+         Marlin Buster
+         
+            Blue
+            3
+         
+      
+      
+         Ziggi
+         44
+         Tuna Finder
+         
+            Red
+            5
+         
+      
+   
+
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>可以看到，输出完全模仿 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing11">清 单 11</a> 中实例化及创建的 POJO。其中有两个 <code>advancedLure</code> 元素，它们各自包含用来填充相应 POJO 的数据。注意，嵌套也是允许的。</p><p><a name="constructors"><span class="atitle">构造器</span></a></p><p>您的代码有可能使用永久不变的 POJO。在这种情况下，您可能会缺少用于修改字段属性的 setter 方法，相反，您依靠构造器来设置这些值。Simple 也能够处理这种情况。</p><p>在这种情况下，注解指定在构造器参数中，而不是放在字段名称上面。在适当 accessor 方法上面也需要注解。参见 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing13">清 单 13</a>。</p><p><br><a name="listing13"><strong>清单 13. Inventory2 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+public Inventory2(@ElementList(name="lures") List lures, 
+ @Attribute(name="warehouse") String warehouse) {
+     this.lures = lures;
+     this.warehouse = warehouse;
+}
+
+@ElementList(name="lures")
+public List getLures {
+     return lures;
+}
+
+@Attribute(name="warehouse")
+public String getWarehouse {
+     return warehouse;
+}
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>注意，在指定注解作为构造器参数的一部分时，也必须指定它对应的字段名称。对于第一个参数，字段名称是 <code>lures</code>。 对于第二个参数，字段名称是 <code>warehouse</code>。</p><p>然后提供 accessor 方法上面所匹配的注解和字段名称。在 <code>lures</code> 的 getter 方法的正上方，可以看到适当的注解，完全匹配构造器中使用的注解。类似地，<code>warehouse</code> 的 getter 方法上面的注解也完全匹配该注解。</p><p>要执行该代码，只需对 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing11">清 单 11</a> 稍加修改，以包含 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing14">清 单 14</a> 中的代码。</p><p><br><a name="listing14"><strong>清单 14. LureExample5 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+Inventory2 inventory = new Inventory2(lures,"MidWest");
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>使用 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing14">清 单 14</a> 中的代码，而不使用 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing11">清 单 11</a> 中使用的 setter 方法。其余都保持不变。</p><p><a name="templatefilters"><span class="atitle">模板过滤器</span></a></p><p>Simple 的另一个伟大特性是，在反序列化 XML 文档时能够使用模板过滤器或默认值。</p><p>回到初始的 lure.xml，但是稍微修改一下，如 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing15">清 单 15</a> 所示。</p><p><br><a name="listing15"><strong>清单 15. Lure2.xml 文档</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+
+   ${lure.company}
+   23
+   Marlin Buster
+
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>注意 company 元素怎么不是包含实际的公司名称，而是包含一个类似于 Apache Ant 的变量声明？在本例中，变量的名称是 <code>lure.company</code>。</p><p>模板过滤器允许您用在运行时建立的实际的值代替变量声明。做到这一点最容易的一种方式是，利用一个 <code>Map</code> 对象将变量名与它的值相关联。然后使用该 <code>Map</code> 对象从 Simple 框架构造一个 <code>Filter</code> 对象。然后再使用该 <code>Filter</code> 对象构造 <code>Persister</code> 对象。我们来看一下 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing16">清 单 16</a>。</p><p><br><a name="listing16"><strong>清单 16. LureExample6 类</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+Map map = new HashMap;
+map.put("lure.company", "Monmouth");
+Filter filter = new MapFilter(map);
+			
+Serializer serializer = new Persister(filter);
+File source = new File("lure2.xml");
+
+Lure lure = serializer.read(Lure.class, source);
+
+System.out.println(lure.getCompany);
+System.out.println(lure.getModel);
+System.out.println(lure.getQuantityInStock);
+System.out.println(lure.getType);</pre><pre class="displaycode" name="code">&nbsp;</pre><pre class="displaycode" name="code"><p><a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing16">清 单 16</a> 与 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing2">清 单 2</a> 并没有大的差别。主要差别是，实例化了一个 <code>HashMap</code>，用于将一个 <code>String</code> 值与一个 <code>String</code> 键相关联。本例中的 <code>String</code> 键果然是 <code>lure.company</code>， 即 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing15">清 单 15</a> 中使用的变量名。这里给它分配的值是 <code>Monmouth</code>，而不是前面 XML 文档中的 <code>Donzai</code>。</p><p>执行该代码时，输出应该类似于 <a href="http://www.ibm.com/developerworks/cn/xml/x-simplexobjs/#listing17">清 单 17</a>。</p><p>
+<a name="listing17"><strong>清单 17. LureExample6 的输出</strong></a></p><table cellspacing="0" cellpadding="0" width="100%" border="0"><tbody><tr><td class="code-outline"><pre class="displaycode" name="code">				
+Monmouth
+Marlin Buster
+23
+Trolling
+</pre></td></tr></tbody></table><p>&nbsp;</p><p>可以看到，模板过滤器用 <code>Map</code> 对象中与该键名关联的实际值取代了变量名 <code>lure.company</code>。 输出与预期完全一致。</p><p><a name="conclusion"><span class="atitle">结束语</span></a></p><p>如您所见，Simple 是一个健壮的 XML 序列化和反序列化框架。易于使用，无需配置，并且简化了开发工作。</p><p>Simple 有很多强大的特性，但是由于篇幅所限，这里只探讨了其中很少的几个特性。我强烈建议需要在软件开发项目中采用 XML 序列化和反序列化的开发人员考虑使用 Simple。</p></pre></td></tr></tbody></table><em class="actions"></em>
+</div>
+
+
+
+
+<!-- Baidu Button BEGIN -->
+
+<div class="bdsharebuttonbox bdshare-button-style0-16" style="float: right;" data-bd-bind="1409622632027">
+<a href="http://blog.csdn.net/xiao229404041/article/details/6629725#" class="bds_more" data-cmd="more" style="background-position:0 0 !important; background-image: url(http://bdimg.share.baidu.com/static/api/img/share/icons_0_16.png?v=d754dcc0.png) !important"></a>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6629725#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间" style="background-position:0 -52px !important"></a>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6629725#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博" style="background-position:0 -104px !important"></a>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6629725#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博" style="background-position:0 -260px !important"></a>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6629725#" class="bds_renren" data-cmd="renren" title="分享到人人网" style="background-position:0 -208px !important"></a>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6629725#" class="bds_weixin" data-cmd="weixin" title="分享到微信" style="background-position:0 -1612px !important"></a>
+</div>
+<script>window._bd_share_config = { "common": { "bdSnsKey": {}, "bdText": "", "bdMini": "1", "bdMiniList": false, "bdPic": "", "bdStyle": "0", "bdSize": "16" }, "share": {} }; with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];</script>
+<!-- Baidu Button END -->
+
+<!--192.168.100.35-->
+<ul class="article_next_prev">
+            <li class="prev_article"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_shangyipian&#39;]);location.href=&#39;/xiao229404041/article/details/6624820&#39;;">上一篇</span><a href="http://blog.csdn.net/xiao229404041/article/details/6624820" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_shangyipian&#39;])">NDK 开发环境搭建</a></li>
+            <li class="next_article"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_xiayipian&#39;]);location.href=&#39;/xiao229404041/article/details/6632778&#39;;">下一篇</span><a href="http://blog.csdn.net/xiao229404041/article/details/6632778" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_xiayipian&#39;])">ubuntu下android 源码的编译</a></li>
+</ul>
+
+<!-- Baidu Button BEGIN -->
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=1536434" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/bds_s_v2.js"></script>
+
+<script type="text/javascript">
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+
+</div>
+      <dl class="blog-associat-tag">
+        <dt>主题推荐</dt>
+        <dd>
+                <a href="http://www.csdn.net/tag/xml" target="_blank" class="blog-tage-red">xml</a> 
+                <a href="http://www.csdn.net/tag/%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98" target="_blank" class="blog-tage-red">开发人员</a> 
+                <a href="http://www.csdn.net/tag/%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F" target="_blank" class="blog-tage-red">应用程序</a> 
+                <a href="http://www.csdn.net/tag/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91" target="_blank" class="blog-tage-red">软件开发</a> 
+                <a href="http://www.csdn.net/tag/application" target="_blank" class="blog-tage-red">application</a> 
+        </dd>
+    </dl> 
+
+
+<dl class="blog-ass-articl tracking-ad" data-mod="popu_36" id="res-relatived"> 
+     <dt><span>猜你在找</span></dt>    
+<dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/liuxiaochen77/article/details/6687881" title="使用 Perl 的 XML::Simple 解析 XML 文档" strategy="SearchAlgorithm" target="_blank">使用 Perl 的 XML::Simple 解析 XML 文档</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/zhangmking/article/details/6914349" title="Perl XML::Simple 详解" strategy="SearchAlgorithm" target="_blank">Perl XML::Simple 详解</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/chiweitree/article/details/8172794" title="SqlMapConfig.xml中JDBC事务管理SIMPLE  dataSource的相关属性配置" strategy="SearchAlgorithm" target="_blank">SqlMapConfig.xml中JDBC事务管理SIMPLE  dataSource的相关属性配置</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/legend_x/article/details/19354163" title="软件开发人员真的了解SQL索引吗(索引使用原则)" strategy="SearchAlgorithm" target="_blank">软件开发人员真的了解SQL索引吗(索引使用原则)</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/zhouzxi/article/details/36443657" title="让你提前认识软件开发(33)：数据操纵语言(DML)" strategy="SearchAlgorithm" target="_blank">让你提前认识软件开发(33)：数据操纵语言(DML)</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/wangeclipse/article/details/16976627" title="IOS开发之—-XML常用操作" strategy="SearchAlgorithm" target="_blank">IOS开发之—-XML常用操作</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/qing_soft/article/details/29911167" title="使用XStream操作XML和JSON" strategy="SearchAlgorithm" target="_blank">使用XStream操作XML和JSON</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/haidong_IT/article/details/25634787" title="使用stax操作xml（4）" strategy="SearchAlgorithm" target="_blank">使用stax操作xml（4）</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/haidong_IT/article/details/25634981" title="使用stax操作xml（6）" strategy="SearchAlgorithm" target="_blank">使用stax操作xml（6）</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/ft2166826/article/details/22945295" title="Dom元素基本操作方法API，先记录下，方便以后使用。  　　W3C DOM和JavaScript很容易混淆不清。DOM是面向HTML和XML文档的API，为文档提供了结构化表示，并定义了如何通过脚本" strategy="SearchAlgorithm" target="_blank">Dom元素基本操作方法API，先记录下，方便以后使用。  　　W3C DOM和JavaScript很容易混淆不清。DOM是面向HTML和XML文档的API，为文档提供了结构化表示，并定义了如何通过脚本</a></dd></dl>
+
+<script type="text/javascript">
+    var searchtitletags = '使用simple-dml.jar 简化对xml的操作' + ',' + 'xml,开发人员,应用程序,软件开发,application';
+    searchService({
+        index: 'blog',
+        query: searchtitletags,
+        from: 10,
+        size: 10,
+        appendTo: '#res-relatived',
+        url: 'recommend',
+        his: 2,
+        client: "blog_cf_enhance",
+        tmpl: '<dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="#{ url }" title="#{ title }" strategy="#{ strategy }">#{ title }</a></dd>'
+    });
+
+ </script>   
+
+
+    <div id="ad_cen">
+   
+          <script type="text/javascript">
+              new Ad(4, 'ad_cen');
+          </script>
+    <iframe id="ad_frm_0" frameborder="0" scrolling="no" style="border-width: 0px; overflow: hidden; width: 746px; height: 90px; " src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ad(1).htm"></iframe></div>
+<div class="comment_class">
+    <div id="comment_title" class="panel_head">
+        <span class="see_comment">查看评论</span><a name="comments"></a></div>
+    <div id="comment_list"><br>&nbsp;&nbsp;暂无评论<br><br><div class="clear"></div></div>
+    <div id="comment_bar">
+    </div>
+    <div id="comment_form"><div class="guest_link">您还没有登录,请<a href="javascript:void(0);" onclick="javascript:csdn.showLogin(function (dat) {js_logined(dat.data.userName);});">[登录]</a>或<a href="http://passport.csdn.net/account/register?from=http%3A%2F%2Fblog.csdn.net%2Fxiao229404041%2Farticle%2Fdetails%2F6629725">[注册]</a></div></div>
+
+    <div class="announce">
+        * 以上用户言论只代表其个人观点，不代表CSDN网站的观点或立场<a name="reply"></a><a name="quote"></a></div>
+</div>
+
+<script type="text/javascript">
+    var fileName = '6629725';
+    var commentscount = 0;
+    var islock = false
+</script>
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/comment.js"></script>
+    <div id="ad_bot">
+    <iframe id="ad_frm_1" frameborder="0" scrolling="no" style="border-width: 0px; overflow: hidden; width: 746px; height: 0px; " src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ad(2).htm"></iframe></div>
+    <script type="text/javascript">
+    new Ad(5, 'ad_bot');
+    </script>
+<div id="report_dialog">
+</div>
+
+<div id="d-top" style="bottom:60px;">
+      
+
+       <a id="quick-reply" class="btn btn-top q-reply" title="快速回复" style="display:none;">
+            <img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/blog-icon-reply.png" alt="快速回复">
+        </a>    
+
+    <a id="d-top-a" class="btn btn-top backtop" style="" title="返回顶部" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_huidaodingbu&#39;])">         
+         <img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/top.png" alt="TOP">
+    </a>
+</div>
+<script type="text/javascript">
+    $(function ()
+    {
+        $("#ad_frm_0").height("90px");
+        
+        setTimeout(function(){
+            $("#ad_frm_2").height("200px");
+        },1000);
+        
+
+        if($("#comment_content").length>0)
+        {
+            $("#quick-reply").show();
+
+            $("#quick-reply").click(function(){
+                setEditorFocus();
+            });
+        }       
+     
+        var d_top = $('#d-top-a');
+        document.onscroll = function ()
+        {
+            var scrTop = (document.body.scrollTop || document.documentElement.scrollTop);
+            if (scrTop > 500)
+            {
+                d_top.show();
+            } else
+            {
+                d_top.hide();
+            }
+        }
+        $('#d-top-a').click(function ()
+        {
+            scrollTo(0, 0);
+            this.blur();
+            return false;
+        });
+    });
+  
+</script>
+<style type="text/css">
+    .tag_list
+    {
+        background: none repeat scroll 0 0 #FFFFFF;
+        border: 1px solid #D7CBC1;
+        color: #000000;
+        font-size: 12px;
+        line-height: 20px;
+        list-style: none outside none;
+        margin: 10px 2% 0 1%;
+        padding: 1px;
+    }
+    .tag_list h5
+    {
+        background: none repeat scroll 0 0 #E0DBD3;
+        color: #47381C;
+        font-size: 12px;
+        height: 24px;
+        line-height: 24px;
+        padding: 0 5px;
+        margin: 0;
+    }
+    .tag_list h5 a
+    {
+        color: #47381C;
+    }
+    .classify
+    {
+        margin: 10px 0;
+        padding: 4px 12px 8px;
+    }
+    .classify a
+    {
+        margin-right: 20px;
+        white-space: nowrap;
+    }
+</style>
+<div class="tag_list">
+    <h5>
+        <a href="http://www.csdn.net/tag/" target="_blank">核心技术类目</a></h5>
+    <div class="classify">
+<a title="全部主题" href="http://www.csdn.net/tag" target="_blank" onclick="LogClickCount(this,336);">全部主题</a>
+<a title="Hadoop" href="http://g.csdn.net/5272865" target="_blank" onclick="LogClickCount(this,336);">Hadoop</a>
+<a title="AWS" href="http://g.csdn.net/5272866" target="_blank" onclick="LogClickCount(this,336);">AWS</a>
+<a title="移动游戏" href="http://g.csdn.net/5272870" target="_blank" onclick="LogClickCount(this,336);">移动游戏</a>
+<a title="Java" href="http://g.csdn.net/5272871" target="_blank" onclick="LogClickCount(this,336);">Java</a>
+<a title="Android" href="http://g.csdn.net/5272872" target="_blank" onclick="LogClickCount(this,336);">Android</a>
+<a title="iOS" href="http://g.csdn.net/5272873" target="_blank" onclick="LogClickCount(this,336);">iOS</a>
+<a title="Swift" href="http://g.csdn.net/5272868" target="_blank" onclick="LogClickCount(this,336);">Swift</a>
+<a title="智能硬件" href="http://g.csdn.net/5272869" target="_blank" onclick="LogClickCount(this,336);">智能硬件</a>
+<a title="Docker" href="http://g.csdn.net/5272867" target="_blank" onclick="LogClickCount(this,336);">Docker</a>
+<a title="OpenStack" href="http://g.csdn.net/5272925" target="_blank" onclick="LogClickCount(this,336);">OpenStack</a>
+<a title="VPN" href="http://www.csdn.net/tag/vpn" target="_blank" onclick="LogClickCount(this,336);">VPN</a>
+<a title="Spark" href="http://g.csdn.net/5272924" target="_blank" onclick="LogClickCount(this,336);">Spark</a>
+<a title="ERP" href="http://www.csdn.net/tag/erp" target="_blank" onclick="LogClickCount(this,336);">ERP</a>
+<a title="IE10" href="http://www.csdn.net/tag/ie10" target="_blank" onclick="LogClickCount(this,336);">IE10</a>
+<a title="Eclipse" href="http://www.csdn.net/tag/eclipse" target="_blank" onclick="LogClickCount(this,336);">Eclipse</a>
+<a title="CRM" href="http://www.csdn.net/tag/crm" target="_blank" onclick="LogClickCount(this,336);">CRM</a>
+<a title="JavaScript" href="http://www.csdn.net/tag/javascript" target="_blank" onclick="LogClickCount(this,336);">JavaScript</a>
+<a title="数据库" href="http://www.csdn.net/tag/%E6%95%B0%E6%8D%AE%E5%BA%93" target="_blank" onclick="LogClickCount(this,336);">数据库</a>
+<a title="Ubuntu" href="http://www.csdn.net/tag/ubuntu" target="_blank" onclick="LogClickCount(this,336);">Ubuntu</a>
+<a title="NFC" href="http://www.csdn.net/tag/nfc" target="_blank" onclick="LogClickCount(this,336);">NFC</a>
+<a title="WAP" href="http://www.csdn.net/tag/wap" target="_blank" onclick="LogClickCount(this,336);">WAP</a>
+<a title="jQuery" href="http://www.csdn.net/tag/jquery" target="_blank" onclick="LogClickCount(this,336);">jQuery</a>
+<a title="BI" href="http://www.csdn.net/tag/bi" target="_blank" onclick="LogClickCount(this,336);">BI</a>
+<a title="HTML5" href="http://www.csdn.net/tag/html5" target="_blank" onclick="LogClickCount(this,336);">HTML5</a>
+<a title="Spring" href="http://www.csdn.net/tag/spring" target="_blank" onclick="LogClickCount(this,336);">Spring</a>
+<a title="Apache" href="http://www.csdn.net/tag/apache" target="_blank" onclick="LogClickCount(this,336);">Apache</a>
+<a title=".NET" href="http://www.csdn.net/tag/.net" target="_blank" onclick="LogClickCount(this,336);">.NET</a>
+<a title="API" href="http://www.csdn.net/tag/api" target="_blank" onclick="LogClickCount(this,336);">API</a>
+<a title="HTML" href="http://www.csdn.net/tag/html" target="_blank" onclick="LogClickCount(this,336);">HTML</a>
+<a title="SDK" href="http://www.csdn.net/tag/sdk" target="_blank" onclick="LogClickCount(this,336);">SDK</a>
+<a title="IIS" href="http://www.csdn.net/tag/iis" target="_blank" onclick="LogClickCount(this,336);">IIS</a>
+<a title="Fedora" href="http://www.csdn.net/tag/fedora" target="_blank" onclick="LogClickCount(this,336);">Fedora</a>
+<a title="XML" href="http://www.csdn.net/tag/xml" target="_blank" onclick="LogClickCount(this,336);">XML</a>
+<a title="LBS" href="http://www.csdn.net/tag/lbs" target="_blank" onclick="LogClickCount(this,336);">LBS</a>
+<a title="Unity" href="http://www.csdn.net/tag/unity" target="_blank" onclick="LogClickCount(this,336);">Unity</a>
+<a title="Splashtop" href="http://www.csdn.net/tag/splashtop" target="_blank" onclick="LogClickCount(this,336);">Splashtop</a>
+<a title="UML" href="http://www.csdn.net/tag/uml" target="_blank" onclick="LogClickCount(this,336);">UML</a>
+<a title="components" href="http://www.csdn.net/tag/components" target="_blank" onclick="LogClickCount(this,336);">components</a>
+<a title="Windows Mobile" href="http://www.csdn.net/tag/windowsmobile" target="_blank" onclick="LogClickCount(this,336);">Windows Mobile</a>
+<a title="Rails" href="http://www.csdn.net/tag/rails" target="_blank" onclick="LogClickCount(this,336);">Rails</a>
+<a title="QEMU" href="http://www.csdn.net/tag/qemu" target="_blank" onclick="LogClickCount(this,336);">QEMU</a>
+<a title="KDE" href="http://www.csdn.net/tag/kde" target="_blank" onclick="LogClickCount(this,336);">KDE</a>
+<a title="Cassandra" href="http://www.csdn.net/tag/cassandra" target="_blank" onclick="LogClickCount(this,336);">Cassandra</a>
+<a title="CloudStack" href="http://www.csdn.net/tag/cloudstack" target="_blank" onclick="LogClickCount(this,336);">CloudStack</a>
+<a title="FTC" href="http://www.csdn.net/tag/ftc" target="_blank" onclick="LogClickCount(this,336);">FTC</a>
+<a title="coremail" href="http://www.csdn.net/tag/coremail" target="_blank" onclick="LogClickCount(this,336);">coremail</a>
+<a title="OPhone " href="http://www.csdn.net/tag/ophone" target="_blank" onclick="LogClickCount(this,336);">OPhone </a>
+<a title="CouchBase" href="http://www.csdn.net/tag/couchbase" target="_blank" onclick="LogClickCount(this,336);">CouchBase</a>
+<a title="云计算" href="http://www.csdn.net/tag/%E4%BA%91%E8%AE%A1%E7%AE%97" target="_blank" onclick="LogClickCount(this,336);">云计算</a>
+<a title="iOS6" href="http://www.csdn.net/tag/iOS6" target="_blank" onclick="LogClickCount(this,336);">iOS6</a>
+<a title="Rackspace " href="http://www.csdn.net/tag/rackspace" target="_blank" onclick="LogClickCount(this,336);">Rackspace </a>
+<a title="Web App" href="http://www.csdn.net/tag/webapp" target="_blank" onclick="LogClickCount(this,336);">Web App</a>
+<a title="SpringSide" href="http://www.csdn.net/tag/springside" target="_blank" onclick="LogClickCount(this,336);">SpringSide</a>
+<a title="Maemo" href="http://www.csdn.net/tag/maemo" target="_blank" onclick="LogClickCount(this,336);">Maemo</a>
+<a title="Compuware" href="http://www.csdn.net/tag/compuware" target="_blank" onclick="LogClickCount(this,336);">Compuware</a>
+<a title="大数据" href="http://www.csdn.net/tag/%E5%A4%A7%E6%95%B0%E6%8D%AE" target="_blank" onclick="LogClickCount(this,336);">大数据</a>
+<a title="aptech" href="http://www.csdn.net/tag/aptech" target="_blank" onclick="LogClickCount(this,336);">aptech</a>
+<a title="Perl" href="http://www.csdn.net/tag/perl" target="_blank" onclick="LogClickCount(this,336);">Perl</a>
+<a title="Tornado" href="http://www.csdn.net/tag/tornado" target="_blank" onclick="LogClickCount(this,336);">Tornado</a>
+<a title="Ruby" href="http://www.csdn.net/tag/ruby" target="_blank" onclick="LogClickCount(this,336);">Ruby</a>
+<a title="Hibernate" href="http://www.csdn.net/hibernate" target="_blank" onclick="LogClickCount(this,336);">Hibernate</a>
+<a title="ThinkPHP" href="http://www.csdn.net/tag/thinkphp" target="_blank" onclick="LogClickCount(this,336);">ThinkPHP</a>
+<a title="HBase" href="http://www.csdn.net/tag/hbase" target="_blank" onclick="LogClickCount(this,336);">HBase</a>
+<a title="Pure" href="http://www.csdn.net/tag/pure" target="_blank" onclick="LogClickCount(this,336);">Pure</a>
+<a title="Solr" href="http://www.csdn.net/tag/solr" target="_blank" onclick="LogClickCount(this,336);">Solr</a>
+<a title="Angular" href="http://www.csdn.net/tag/angular" target="_blank" onclick="LogClickCount(this,336);">Angular</a>
+<a title="Cloud Foundry" href="http://www.csdn.net/tag/cloudfoundry" target="_blank" onclick="LogClickCount(this,336);">Cloud Foundry</a>
+<a title="Redis" href="http://www.csdn.net/tag/redis" target="_blank" onclick="LogClickCount(this,336);">Redis</a>
+<a title="Scala" href="http://www.csdn.net/tag/scala" target="_blank" onclick="LogClickCount(this,336);">Scala</a>
+<a title="Django" href="http://www.csdn.net/tag/django" target="_blank" onclick="LogClickCount(this,336);">Django</a>
+<a title="Bootstrap" href="http://www.csdn.net/tag/bootstrap" target="_blank" onclick="LogClickCount(this,336);">Bootstrap</a>
+    </div>
+</div>
+
+
+                        <div class="clear">
+                        </div>
+                    </div>                   
+                
+            </div>
+            <div id="side">
+    <div class="side">
+<div id="panel_Profile" class="panel">
+<ul class="panel_head"><span>个人资料</span></ul>
+<ul class="panel_body profile">
+<div id="blog_userface">
+    <a href="http://my.csdn.net/xiao229404041" target="_blank">
+    <img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/1_xiao229404041.jpg" title="访问我的空间" style="max-width:90%">
+    </a>
+    <br>
+    <span><a href="http://my.csdn.net/xiao229404041" class="user_name" target="_blank">xiao229404041</a></span>
+</div>
+<div class="interact">
+<a href="javascript:void(0);" class="attent" id="span_add_follow" title="[加关注]" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_guanzhu&#39;])"></a>
+<a href="javascript:void(0);" class="letter" onclick="loginto(1)" title="[发私信]"></a>
+</div>
+<div id="blog_medal">
+<div id="bms_box"><a href="http://medal.blog.csdn.net/allmedal.aspx" target="_blank"><img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/holdon_s2.gif" onmouseover="m_over_m(this,0)" onmouseout="m_out_m()" alt=""></a></div></div>
+<ul id="blog_rank">
+    <li>访问：<span>61326次</span></li>
+    <li>积分：<span>1041分</span></li>
+    <li>排名：<span>第15768名</span></li>
+</ul>
+<ul id="blog_statistics">
+    <li>原创：<span>50篇</span></li>
+    <li>转载：<span>6篇</span></li>
+    <li>译文：<span>0篇</span></li>
+    <li>评论：<span>24条</span></li>
+</ul>
+</ul>
+</div>
+
+
+<div class="panel" id="panel_Search">
+    <ul class="panel_head"><span>文章搜索</span></ul>
+    <ul class="panel_body">
+        <form id="frmSearch" action="http://so.csdn.net/search" class="form_search" target="_blank">
+        <span><input id="inputSearch" type="text" class="blogsearch" title="请输入关键字"></span>
+        <input id="btnSubmit" type="button" value="搜索" title="search in blog">
+        <input type="hidden" name="q" id="inputQ">
+        <input type="hidden" name="t" value="blog">
+        <a id="btnSearchBlog" target="_blank"></a>
+        </form>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSubmit").click(function () {           
+            search();
+        });
+
+        $("#frmSearch").submit(function () {
+            search();
+            return false;
+        });
+
+        function search()
+        {
+            var url = "http://so.csdn.net/so/search/s.do?q=" + encodeURIComponent($("#inputSearch").val()) + "&u=" + username + "&t=blog";
+            window.location.href = url;
+        }   
+    });
+</script><div id="panel_Category" class="panel">
+<ul class="panel_head"><span>文章分类</span></ul>
+<ul class="panel_body">
+             <li>
+                <a href="http://blog.csdn.net/xiao229404041/article/category/896264" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">android 编译</a><span>(14)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/xiao229404041/article/category/896266" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">linux 驱动开发</a><span>(6)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/xiao229404041/article/category/896265" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">javaEE</a><span>(0)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/xiao229404041/article/category/896267" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">心得</a><span>(0)</span>
+            </li>
+</ul>
+</div><div id="panel_Archive" class="panel">
+<ul class="panel_head"><span>文章存档</span></ul>
+<ul class="panel_body">
+<div id="archive_list"><li><a href="http://blog.csdn.net/xiao229404041/article/month/2012/01">2012年01月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/12">2011年12月</a><span>(4)</span></li><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/11">2011年11月</a><span>(5)</span></li><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/10">2011年10月</a><span>(8)</span></li><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/09">2011年09月</a><span>(6)</span></li><span class="hidelist" style="display:none;"><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/08">2011年08月</a><span>(7)</span></li><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/07">2011年07月</a><span>(8)</span></li><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/06">2011年06月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/05">2011年05月</a><span>(6)</span></li><li><a href="http://blog.csdn.net/xiao229404041/article/month/2011/04">2011年04月</a><span>(8)</span></li></span><div id="archive_list_button" class="list_closed">展开</div></div>
+</ul>
+</div>
+<div id="hotarticls" class="panel">
+<ul class="panel_head">
+    <span>       
+阅读排行    </span>
+</ul>
+
+<ul class="panel_body itemlist">
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6669696" title="C-Free 5.0最新注册码">C-Free 5.0最新注册码</a><span>(13190)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6582677" title="android 模拟器获得root 权限">android 模拟器获得root 权限</a><span>(11158)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6635661" title="android ListView 应用及事件监听方法">android ListView 应用及事件监听方法</a><span>(4867)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6624820" title="NDK 开发环境搭建">NDK 开发环境搭建</a><span>(3256)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6847946" title="ubuntu 下交叉编译环境的搭建及环境变量的配置">ubuntu 下交叉编译环境的搭建及环境变量的配置</a><span>(2147)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/7031776" title="Linux设备驱动之semaphore机制">Linux设备驱动之semaphore机制</a><span>(1614)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6611819" title="json与struts2进行数据交互">json与struts2进行数据交互</a><span>(1417)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6846899" title="如何设置windows 与VBox中的ubuntu设置文件共享">如何设置windows 与VBox中的ubuntu设置文件共享</a><span>(1195)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/7007944" title="ubuntu 内核的升级与编译">ubuntu 内核的升级与编译</a><span>(1140)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6461744" title="Ubuntu安装配置NX Server">Ubuntu安装配置NX Server</a><span>(1085)</span>
+</li>
+</ul>
+</div>
+<div id="hotarticls2" class="panel">
+<ul class="panel_head"><span>评论排行</span></ul>
+<ul class="panel_body itemlist">
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6669696" title="C-Free 5.0最新注册码">C-Free 5.0最新注册码</a><span>(13)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6902648" title="基于6410的u-boot移植">基于6410的u-boot移植</a><span>(2)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6624820" title="NDK 开发环境搭建">NDK 开发环境搭建</a><span>(2)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6872919" title="Linux 内核下载及编译">Linux 内核下载及编译</a><span>(2)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6635661" title="android ListView 应用及事件监听方法">android ListView 应用及事件监听方法</a><span>(2)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6956099" title="ubuntu 调试HelloWorld 驱动">ubuntu 调试HelloWorld 驱动</a><span>(1)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6830123" title="ubuntu c/c++ 开发环境搭建">ubuntu c/c++ 开发环境搭建</a><span>(1)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6407773" title="dom4j的使用">dom4j的使用</a><span>(1)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6835710" title="嵌入式系统">嵌入式系统</a><span>(0)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/xiao229404041/article/details/6846899" title="如何设置windows 与VBox中的ubuntu设置文件共享">如何设置windows 与VBox中的ubuntu设置文件共享</a><span>(0)</span>
+</li>
+</ul>
+</div>
+<div id="homepageArticles" class="panel tracking-ad" data-mod="popu_4">
+<ul class="panel_head"><span>推荐文章</span></ul>
+<ul class="panel_body" id="ad_commend"><iframe id="ad_frm_2" frameborder="0" scrolling="no" style="border-width: 0px; overflow: hidden; width: 182px; height: 200px; " src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ad.htm"></iframe></ul>
+</div>
+<script type="text/javascript">
+ new Ad(12, 'ad_commend');
+</script><div id="newcomments" class="panel">
+<ul class="panel_head"><span>最新评论</span></ul>
+<ul class="panel_body itemlist">
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6669696#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/qq_20261499" class="user_name">qq_20261499</a>:
+十分感谢啊
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">android ListView 应用及事件监听方法</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/zhsaymj" class="user_name">zhsaymj</a>:
+赞一个
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/qq_16248241" class="user_name">qq_16248241</a>:
+不错哦，十二分感谢
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/u014641220" class="user_name">u014641220</a>:
+很好用，感谢！
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/hjy921107" class="user_name">hjy921107</a>:
+Very good ! Thank you !
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/ljmagic_love" class="user_name">ljmagic_love</a>:
+非常的好 ，感谢啊！
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/wangmingxianyihao" class="user_name">jasonkent27</a>:
+太好了。
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/xk15380832887" class="user_name">幾暒灀</a>:
+好东西~~~
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/u011746418" class="user_name">AsaBale</a>:
+谢谢你
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/xiao229404041/article/details/6635661#comments">C-Free 5.0最新注册码</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/yang_yansong" class="user_name">yang_yansong</a>:
+我想问问这机械码是从哪里来的？
+    </p>
+    </li>
+</ul>
+</div>
+    </div>
+    <div class="clear">
+    </div>
+</div>
+
+            <div class="clear">
+            </div>
+        </div>
+        
+
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/cnick.js"></script>
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/newblog.min.js"></script>
+
+
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/showblogmedal.ashx"></script>
+<script type="text/javascript">
+    document.write('<script type="text/javascript" src="http://csdnimg.cn/pubfooter/js/publib_footer.js?' + Math.floor(new Date() / 120000).toString(36) + '="></' + 'script>');
+</script><script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/publib_footer.js"></script><link rel="stylesheet" type="text/css" href="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/pub_footer_2012.css"><div id="pub_footerall" class="pub_footerall"><dl><dt></dt> <dd><a href="http://www.csdn.net/company/about.html" target="_blank">公司简介</a>|<a href="http://www.csdn.net/company/recruit.html" target="_blank">招贤纳士</a>|<a href="http://www.csdn.net/company/marketing.html" target="_blank">广告服务</a>|<a href="http://www.csdn.net/company/account.html" target="_blank">银行汇款帐号</a>|<a href="http://www.csdn.net/company/contact.html" target="_blank">联系方式</a>|<a href="http://www.csdn.net/company/statement.html" target="_blank">版权声明</a>|<a href="http://www.csdn.net/company/layer.html" target="_blank">法律顾问</a>|<a href="mailto:webmaster@csdn.net">问题报告</a>|<a target="_blank" href="http://www.csdn.net/friendlink.html">合作伙伴</a>|<a href="http://bbs.csdn.net/forums/Service" target="_blank">论坛反馈</a></dd><dd><a href="http://wpa.qq.com/msgrd?v=3&uin=2355263776&site=qq&menu=yes" target="_blank" class="qq">网站客服</a> <a href="http://wpa.qq.com/msgrd?v=3&uin=2251809102&site=qq&menu=yes" target="_blank" class="qq">杂志客服</a> <a href="http://e.weibo.com/csdnsupport/profile" target="_blank" class="weibo">微博客服</a> <a href="mailto:webmaster@csdn.net" class="email" title="联系邮箱">webmaster@csdn.net</a> <span class="phone" title="服务热线">400-600-2320</span></dd><dd>京&nbsp;ICP&nbsp;证&nbsp;070598&nbsp;号</dd><dd>北京创新乐知信息技术有限公司 版权所有</dd><dd>江苏乐知网络技术有限公司 提供商务支持</dd><dd>Copyright © 1999-2014, CSDN.NET, All Rights Reserved&nbsp;<a href="http://www.hd315.gov.cn/beian/view.asp?bianhao=010202001032100010" target="_blank"><img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/gongshang_logos.gif" alt="GongshangLogo" title=""></a></dd></dl></div><div id="note1" class="csdn_note" style="display:none; position:absolute; z-index:9999; width:440px">  <span class="notice_top_arrow"><span class="inner"></span></span>  <div class="box"></div></div><div class="csdn_notice_tip" style="display: none; position: absolute; z-index: 9990; width: 170px; ">  <iframe src="about:blank" frameborder="0" scrolling="no" style="z-index:-1;position:absolute;top:0;left:0;width:100%;height:100%;background:transparent"></iframe>  <div class="tip_text">您有<strong>0</strong>条新通知</div>  <a href="javascript:void 0" class="close2"></a></div><script id="noticeScript" type="text/javascript" btnid="header_notice_num" wrapid="note1" count="5" subcount="5" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/notify.js"></script>
+    <script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/login.js"></script>
+<script type="text/javascript">document.write("<img src=http://counter.csdn.net/pv.aspx?id=24 border=0 width=0 height=0>");</script><img src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/pv.aspx" border="0" width="0" height="0">
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/counter.js"></script><script type="text/javascript" charset="UTF-8" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/msg.popup.js"></script>
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ad-blog.js"></script><script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ad-ms960.js"></script>
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ad-ms962_2.js"></script>
+
+<script type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/count.js"></script><iframe src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/logs.htm" frameborder="0" width="0" height="0"></iframe>
+<script type="text/javascript">
+    $(function () {
+        function __get_code_toolbar(snippet_id) {
+            return $("<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "' target='_blank' title='在CODE上查看代码片' style='text-indent:0;'><img src='https://code.csdn.net/assets/CODE_ico.png' width=12 height=12 alt='在CODE上查看代码片' style='position:relative;top:1px;left:2px;'/></a>"
+                    + "<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "/fork' target='_blank' title='派生到我的代码片'  style='text-indent:0;'><img src='https://code.csdn.net/assets/ico_fork.svg' width=12 height=12 alt='派生到我的代码片' style='position:relative;top:2px;left:2px;'/></a>");
+        }
+        
+        $("[code_snippet_id]").each(function () {
+            __s_id = $(this).attr("code_snippet_id");
+            if (__s_id != null && __s_id != "" && __s_id != 0 && parseInt(__s_id) > 70020) {
+                __code_tool = __get_code_toolbar(__s_id);
+                $(this).prev().find(".tools").append(__code_tool);
+            }
+        });
+    });
+</script>
+
+    </div>
+      <!--new top-->
+    
+    <script id="csdn-toolbar-id" btnid="header_notice_num" wrapid="note1" count="5" subcount="5" type="text/javascript" src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/toolbar.js"></script>
+     <!--new top-->
+
+
+<div id="tag-suggest-pop" style="display: none; ">
+  <div class="relative">
+    <div class="close"></div>
+    <div class="content"><div><span>更多相关资源：</span><a href="http://www.csdn.net/tag/xml" title="关于 xml 的主题" target="_blank">xml</a></div></div>
+  </div>
+</div><iframe style="width: 1px; height: 1px; position: absolute; visibility: hidden; " src="./使用simple-dml.jar 简化对xml的操作 - xiao229404041的专栏 - 博客频道 - CSDN.NET_files/ibm-ca-q3-softlayer-bbs-homepage-mai-banner-760-90-30k.htm"></iframe></body></html>

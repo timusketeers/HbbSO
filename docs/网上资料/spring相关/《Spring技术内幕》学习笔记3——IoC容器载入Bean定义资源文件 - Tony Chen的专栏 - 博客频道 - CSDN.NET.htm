@@ -1,0 +1,1132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0053)http://blog.csdn.net/chjttony/article/details/6259723 -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <script type="text/javascript" async="" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ga.js"></script><script id="allmobilize" charset="utf-8" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/allmobilize.min.js"></script><style type="text/css"></style>
+ <meta http-equiv="Cache-Control" content="no-siteapp"><link rel="alternate" media="handheld" href="http://blog.csdn.net/chjttony/article/details/6259723#">
+
+    <title>《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏
+        - 博客频道 - CSDN.NET</title>
+    
+    <meta name="description" content="1.当Spring的IoC容器将Bean定义的资源文件封装为Spring的Resource之后，接下来要做的就是通过Spring的资源加载器(resourceLoader)读入Bean定义资源文件的过程。对于IoC容器来说，Bean定义的载入过程就是将Bean定义资源文件读入进内存并解析转换成Spring所管理的Bean的数据结构的过程。相对于SpringIoC容器定位Bean定义资源文件来说，B">
+    <script src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/jquery.js" type="text/javascript"></script>
+    <script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ad.js"></script>
+        <!--new top-->
+       
+        <link rel="stylesheet" href="http://static.csdn.net/public/common/toolbar/css/index.css">
+        <!--new top-->
+
+    <link rel="Stylesheet" type="text/css" href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/style.css">
+    <link id="RSSLink" title="RSS" type="application/rss+xml" rel="alternate" href="http://blog.csdn.net/chjttony/rss/list">
+    <link rel="shortcut icon" href="http://csdnimg.cn/public/favicon.ico">
+    <link type="text/css" rel="stylesheet" href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/default.css">
+ 
+
+
+<script src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/share.js"></script><script type="text/javascript" charset="utf-8" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/tracking.js"></script><script type="text/javascript" charset="utf-8" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/main.js"></script><link href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/bdsstyle.css" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/style(1).css"><link type="text/css" rel="stylesheet" href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/style(2).css"><script src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/logger.js"></script><link rel="stylesheet" href="http://bdimg.share.baidu.com/static/api/css/share_style0_16.css?v=89a7173d.css"></head>
+<body><iframe style="display: none; " frameborder="0"></iframe>
+    
+   
+      <!--new top-->
+    <script id="toolbar-tpl-scriptId" fixed="true" prod="blog" skin="black" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/html.js" type="text/javascript"></script><div class="csdn-toolbar csdn-toolbar-skin-black ">        <div class="container row center-block ">          <div class="col-md-3 pull-left logo clearfix"><a href="http://www.csdn.net/?ref=toolbar" title="CSDN首页" target="_blank" class="icon"></a><a title="频道首页" href="http://blog.csdn.net/?ref=toolbar_logo" target="_blank" class="img blog-icon"></a></div>          <div class="pull-right login-wrap unlogin">            <ul class="btns">              <li class="loginlink"><a href="https://passport.csdn.net/account/login?ref=toolbar" target="_top">登录&nbsp;</a>|<a target="_top" href="https://passport.csdn.net/account/register?ref=toolbar">&nbsp;注册</a></li>              <li class="search">                <div class="icon on-search-icon">                  <div class="wrap">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <form action="http://so.csdn.net/search" method="get" target="_blank">                      <input type="hidden" value="toolbar" name="ref" accesskey="2">                      <div class="border">                        <input placeholder="搜索" type="text" value="" name="q" accesskey="2"><span class="icon-enter-sm"></span>                      </div>                    </form>                  </div>                </div>              </li>              <li class="favor">                <div class="icon on-favor-icon">                  <div class="wrap">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <div style="display:none;" class="favor-success"><span class="msg">收藏成功</span>                      <div class="btns"><span class="btn btn-primary ok">确定</span></div>                    </div>                    <div style="display:none;" class="favor-failed"><span class="icon-danger-lg"></span><span class="msg">收藏失败，请重新收藏</span>                      <div class="btns"><span class="btn btn-primary ok">确定</span></div>                    </div>                    <form role="form" class="form-horizontal favor-form">                      <div class="form-group">                        <div class="clearfix">                          <label for="input-title" class="col-sm-2 control-label">标题</label>                          <div class="col-sm-10">                            <input id="inputTitle" type="text" placeholder="" class="title form-control">                          </div>                        </div>                        <div class="alert alert-danger"><strong></strong>标题不能为空</div>                      </div>                      <div class="form-group">                        <label for="input-url" class="col-sm-2 control-label">网址</label>                        <div class="col-sm-10">                          <input id="input-url" type="text" placeholder="" class="url form-control">                        </div>                      </div>                      <div class="form-group">                        <label for="input-tag" class="col-sm-2 tag control-label">标签</label>                        <div class="col-sm-10">                          <input id="input-tag" type="text" class="form-control tag">                        </div>                      </div>                      <div class="form-group">                        <label for="input-description" class="description col-sm-2 control-label">摘要</label>                        <div class="col-sm-10">                          <textarea id="input-description" class="form-control description"></textarea>                        </div>                      </div>                      <div class="form-group">                        <div class="col-sm-offset-2 col-sm-10 ft">                          <div class="col-sm-4 pull-left">                            <div class="checkbox">                              <label>                                <input type="checkbox" name="share" checked="checked" class="share">公开                              </label>                            </div>                          </div>                          <div class="col-sm-8 pull-right favor-btns">                            <button type="button" class="cancel btn btn-default">取消</button>                            <button type="submit" class="submit btn btn-primary">收藏</button>                          </div>                        </div>                      </div>                    </form>                  </div>                </div>              </li>              <li class="notify">                <div style="display:none" class="number"></div>                <div style="display:none" class="icon-hasnotes-sm"></div>                <div id="header_notice_num"></div>                <div class="icon on-notify-icon">                  <div class="wrap">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <div id="note1" class="csdn_note">                      <div class="box"></div>                    <iframe src="about:block" frameborder="0" allowtransparency="true" style="z-index:-1;position:absolute;top:0;left:0;width:100%;height:100%;background:transparent"></iframe></div>                  </div>                </div>              </li>              <li class="ugc">                <div class="icon on-ugc-icon">                  <div class="wrap clearfix">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <dl>                      <dt><a href="http://geek.csdn.net/news/expert?ref=toolbar" target="_blank" class="p-news clearfix"><em class="icon"></em><span>分享资讯</span></a></dt>                      <dt><a href="http://share.csdn.net/slides/new?ref=toolbar" target="_blank" class="p-doc clearfix"><em class="icon"></em><span>传PPT/文档</span></a></dt>                      <dt><a href="http://bbs.csdn.net/topics/new?ref=toolbar" target="_blank" class="p-ask clearfix"><em class="icon"></em><span>提问题</span></a></dt>                      <dt><a href="http://write.blog.csdn.net/postedit?ref=toolbar" target="_blank" class="p-blog clearfix"><em class="icon"></em><span>写博客</span></a></dt>                      <dt><a href="http://u.download.csdn.net/upload?ref=toolbar" target="_blank" class="p-src clearfix"><em class="icon"></em><span>传资源</span></a></dt>                      <dt><a href="https://code.csdn.net/projects/new?ref=toolbar" target="_blank" class="c-obj clearfix"><em class="icon"></em><span>创建项目</span></a></dt>                      <dt><a href="https://code.csdn.net/snippets/new?ref=toolbar" target="_blank" class="c-code clearfix"><em class="icon"></em><span>创建代码片</span></a></dt>                    </dl>                  </div>                </div>              </li>              <li class="profile">                <div class="icon on-profile-icon"><img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/100x100.jpg" class="curr-icon-img">                  <div class="wrap clearfix">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                    <div class="bd">                      <dl class="clearfix">                        <dt class="pull-left img"><a target="_blank" href="http://my.csdn.net/?ref=toolbar" class="avatar"><img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/100x100.jpg"></a></dt>                        <dd class="info"><a target="_blank" href="http://my.csdn.net/?ref=toolbar" class="nickname"></a><a class="set-nick" href="https://passport.csdn.net/account/profile">设置昵称<span class="write-icon"></span></a><span class="dec"><a class="fill-dec" href="http://my.csdn.net/" target="_blank">编辑自我介绍，让更多人了解你<span class="write-icon"></span></a></span></dd>                      </dl>                    </div>                    <div class="ft clearfix"><a target="_blank" href="http://my.csdn.net/my/account/changepwd?ref=toolbar" class="pull-left"><span class="icon-cog"></span>帐号设置</a><a href="https://passport.csdn.net/account/logout?ref=toolbar" target="_top" class="pull-right "><span class="icon-signout"></span><span class="out">退出</span></a></div>                  </div>                </div>              </li>              <li class="apps">                <div class="icon on-apps-icon">                  <div class="wrap clearfix">                    <div class="curr-icon-wrap">                      <div class="curr-icon"></div>                    </div>                  <div class="detail">                    <dl>                      <dt>                        <h5>社区</h5>                      </dt>                      <dd> <a href="http://blog.csdn.net/?ref=toolbar" target="_blank">博客</a></dd>                      <dd> <a href="http://bbs.csdn.net/?ref=toolbar" target="_blank">论坛</a></dd>                      <dd> <a href="http://download.csdn.net/?ref=toolbar" target="_blank">下载</a></dd>                      <dd><a href="http://share.csdn.net/?ref=toolbar" target="_blank">Share</a></dd>                      <dd><a href="http://geek.csdn.net/?ref=toolbar" target="_blank">极客头条</a></dd>                    </dl>                  </div>                  <div class="detail">                    <dl>                      <dt>                        <h5>服务</h5>                      </dt>                      <dd> <a href="https://code.csdn.net/?ref=toolbar" target="_blank">CODE</a></dd>                      <dd> <a href="http://hero.csdn.net/?ref=toolbar" target="_blank">英雄会</a></dd>                      <dd> <a href="http://huiyi.csdn.net/?ref=toolbar" target="_blank">活动</a></dd>                      <dd> <a href="http://www.csto.com/?ref=toolbar" target="_blank">CSTO</a></dd>                    </dl>                  </div>                  <div class="detail last">                    <dl>                      <dt>                        <h5>俱乐部</h5>                      </dt>                      <dd> <a href="http://cto.csdn.net/?ref=toolbar" target="_blank">CTO俱乐部</a></dd>                      <dd> <a href="http://student.csdn.net/?ref=toolbar" target="_blank">高校俱乐部</a></dd>                    </dl>                  </div>                </div>              </div>            </li>            </ul>          </div>        </div>    </div>
+     <!--new top-->
+    <div id="container">
+        <div id="header">
+    <div class="header">
+        <div id="blog_title">
+            <h2>
+                <a href="http://blog.csdn.net/chjttony">Tony Chen的专栏</a></h2>
+            <h3></h3>
+            <div class="clear">
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div id="navigator">
+    <div class="navigator_bg">
+    </div>
+    <div class="navigator">
+        <ul>
+                <li id="btnContents"><a href="http://blog.csdn.net/chjttony?viewmode=contents"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_mulu&#39;])">
+                    <img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ico_list.gif">目录视图</span></a></li>
+                <li id="btnView"><a href="http://blog.csdn.net/chjttony?viewmode=list"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_zhaiyao&#39;])">
+                    <img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ico_summary.gif">摘要视图</span></a></li>
+                <li id="btnRss"><a href="http://blog.csdn.net/chjttony/rss/list"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_RSS&#39;])">
+                    <img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ico_rss.gif">订阅</span></a></li>                
+
+            </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    var username = "chjttony";
+    var _blogger = username;
+    var blog_address = "http://blog.csdn.net/chjttony";
+    var static_host = "http://static.blog.csdn.net";
+    var currentUserName = "";  
+</script>
+
+        <div id="body">
+            <div id="main">
+                <div class="main">
+                        <div class="ad_class">
+<div class="notice tracking-ad" data-mod="popu_3"> 
+
+<a href="http://blog.csdn.net/blogdevteam/article/details/38514369" target="_blank">
+<font color="blue">7月推荐文章
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://bbs.csdn.net/topics/390863850" target="_blank">
+<font color="red">【限时活动】建专辑得大奖</font></a>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://www.csdn.net/article/2014-08-25/2821359" target="_blank">
+<font color="blue">专访张路斌：从HTML5到Unity的游戏开发之路
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="http://blog.csdn.net/blogdevteam/article/details/38657235" target="_blank"><font color="red">当青春遇上互联网，能否点燃你的创业梦
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="http://blog.csdn.net/blogdevteam/article/details/38418263" target="_blank">
+<font color="blue">推荐有礼--找出您心中的技术大牛
+</font></a>
+
+
+</div>                        </div>
+                        
+
+  
+<link href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/comment1.css" type="text/css" rel="stylesheet">
+<link href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/style1.css" type="text/css" rel="stylesheet">
+<script language="JavaScript" type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/jquery.cookie.js"></script>
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/main(1).js"></script>
+<div id="article_details" class="details">
+    <div class="article_title">   
+         <span class="ico ico_type_Original"></span>
+
+
+    <h1>
+        <span class="link_title"><a href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET.htm">
+        《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件
+        </a></span>
+    </h1>
+</div>
+
+    <div class="article_manage">
+        <span class="link_categories">
+        分类：
+            <a href="http://blog.csdn.net/chjttony/article/category/733215" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_fenlei&#39;]);">java技术</a> 
+            <a href="http://blog.csdn.net/chjttony/article/category/1239946" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_fenlei&#39;]);">Spring</a> 
+        </span>
+    <span class="link_postdate">2011-03-18 18:03</span>
+    <span class="link_view" title="阅读次数">2900人阅读</span>
+    <span class="link_comments" title="评论次数"><a href="http://blog.csdn.net/chjttony/article/details/6259723#comments" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_pinglun&#39;])">评论</a>(0)</span>
+    <span class="link_collect"><a href="javascript:void(0);" onclick="javascript:_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_shoucang&#39;]);collectArticle(&#39;《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件&#39;,&#39;6259723&#39;);return false;" title="收藏">收藏</a></span>
+    <span class="link_report"><a href="http://blog.csdn.net/chjttony/article/details/6259723#report" onclick="javascript:_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_jubao&#39;]);report(6259723,2);return false;" title="举报">举报</a></span>
+    
+</div>
+<div class="tag2box"><a href="http://www.csdn.net/tag/bean" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">bean</a><a href="http://www.csdn.net/tag/ioc" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">ioc</a><a href="http://www.csdn.net/tag/spring" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">spring</a><a href="http://www.csdn.net/tag/parsing" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">parsing</a><a href="http://www.csdn.net/tag/xml" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">xml</a><a href="http://www.csdn.net/tag/null" target="_blank" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_tag&#39;]);">null</a></div>
+
+  
+    
+<div id="article_content" class="article_content">
+
+<p>&nbsp;</p>
+<p class="MsoNormal"><span lang="FR">1.</span><span>当</span><span lang="FR">Spring</span><span>的</span><span lang="FR">IoC</span><span>容器将</span><span lang="FR">Bean</span><span>定义的资源文件封装为</span><span lang="FR">Spring</span><span>的</span><span lang="FR">Resource</span><span>之后，接下来要做的就是通过</span><span lang="FR">Spring</span><span>的资源加载器</span><span lang="FR">(</span><span lang="EN-US">resourceLoader</span><span lang="FR">)</span><span>读入</span><span lang="FR">Bean</span><span>定义资源文件的过程。对于</span><span lang="FR">IoC</span><span>容器来说，</span><span lang="FR">Bean</span><span>定义的载入过程就是将</span><span lang="FR">Bean</span><span>定义资源文件读入进内存并解析转换成</span><span lang="FR">Spring</span><span>所管理的</span><span lang="FR">Bean</span><span>的数据结构的过程。相对于</span><span lang="FR">SpringIoC</span><span>容器定位</span><span lang="FR">Bean</span><span>定义资源文件来说，</span><span lang="FR">Bean</span><span>定义资源文件的载入和解析过程更复杂一些，因此按照程序的运行步骤逐条分析其实现原理。</span><span lang="FR"></span></p>
+<p class="MsoNormal"><span lang="FR">2.</span><span>以</span><a name="OLE_LINK166"></a><a name="OLE_LINK165"><span><span lang="FR">FileSystemXmlApplicationContext</span></span></a><span>为例分析其载入和解析</span><span lang="FR">Bean</span><span>定义资源文件的过程：</span><span lang="FR"></span></p>
+<p class="MsoNormal"><span>首先从</span><span lang="FR">FileSystemXmlApplicationContext</span><span>的入口构造函数分析起</span><span>，</span><span>其代码如下</span><span>：</span></p>
+<p class="MsoNormal"><span><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 667px; width: 19px; height: 19px; z-index: 99; "><embed id="ZeroClipboardMovie_1" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="19" name="ZeroClipboardMovie_1" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=1&amp;width=19&amp;height=19" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="comment">//FileSystemXmlApplicationContext&nbsp;IoC容器进行初始化的入口构造函数</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;FileSystemXmlApplicationContext(String[]&nbsp;configLocations,&nbsp;</span><span class="keyword">boolean</span><span>&nbsp;refresh,&nbsp;ApplicationContext&nbsp;parent)&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throws</span><span>&nbsp;BeansException&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span><span class="comment">//调用父类构造方法，为容器设置资源加载器(resourceLoader)</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">super</span><span>(parent);&nbsp;&nbsp;</span></span></li><li class=""><span><span class="comment">//调用父类AbstractRefreshableConfigApplicationContext的方法，设置//Bean定义的资源文件，完成IoC容器Bean定义资源的定位</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setConfigLocations(configLocations);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(refresh)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span><span class="comment">//调用父类AbstractApplicationContext的refresh()</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span><span class="comment">//函数启动载入Bean定义的过程，是Ioc容器载入Bean定义的入口</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;refresh();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">//FileSystemXmlApplicationContext IoC容器进行初始化的入口构造函数
+	public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh, ApplicationContext parent)
+			throws BeansException {
+//调用父类构造方法，为容器设置资源加载器(resourceLoader)
+		super(parent);
+//调用父类AbstractRefreshableConfigApplicationContext的方法，设置//Bean定义的资源文件，完成IoC容器Bean定义资源的定位
+		setConfigLocations(configLocations);
+		if (refresh) {
+//调用父类AbstractApplicationContext的refresh()
+//函数启动载入Bean定义的过程，是Ioc容器载入Bean定义的入口
+			refresh();
+		}
+	}
+</textarea>&nbsp;</span></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal" align="left"><span lang="EN-US">Spring IoC</span><span>容器对</span><span lang="EN-US">Bean</span><span>定义资源的载入是从</span><span lang="EN-US">refresh()</span><span>函数开始的，</span><span lang="EN-US">FileSystemXmlApplicationContext</span><span>通过调用其父类</span><span lang="EN-US">AbstractApplicationContext</span><span>的</span><span lang="EN-US">refresh()</span><span>函数启动整个</span><span lang="EN-US">IoC</span><span>容器对</span><span lang="EN-US">Bean</span><span>定义的载入过程。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">3.AbstractApplicationContext</span><span>的</span><span lang="EN-US">refresh</span><span>函数载入</span><span lang="EN-US">Bean</span><span>定义过程：</span></p>
+<p class="MsoNormal"><span><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 1124px; width: 19px; height: 19px; z-index: 99; "><embed id="ZeroClipboardMovie_2" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="19" name="ZeroClipboardMovie_2" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=2&amp;width=19&amp;height=19" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="keyword">public</span><span>&nbsp;</span><span class="keyword">void</span><span>&nbsp;refresh()&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeansException,&nbsp;IllegalStateException&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">synchronized</span><span>&nbsp;(</span><span class="keyword">this</span><span>.startupShutdownMonitor)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//调用容器准备刷新的方法，获取容器的当时时间，同时给容器设置同步标识</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prepareRefresh();&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//告诉子类启动refreshBeanFactory()方法，Bean定义资源文件的载入从</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span><span class="comment">//子类的refreshBeanFactory()方法启动</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ConfigurableListableBeanFactory&nbsp;beanFactory&nbsp;=&nbsp;obtainFreshBeanFactory();&nbsp;&nbsp;</span></li><li class=""><span><span class="comment">//为BeanFactory配置容器特性，例如类加载器、事件处理器等</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prepareBeanFactory(beanFactory);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//为容器的某些子类指定特殊的BeanPost事件处理器</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;postProcessBeanFactory(beanFactory);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//调用所有注册的BeanFactoryPostProcessor的Bean</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;invokeBeanFactoryPostProcessors(beanFactory);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//为BeanFactory注册BeanPost事件处理器.</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//BeanPostProcessor是Bean后置处理器，用于监听容器触发的事件</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;registerBeanPostProcessors(beanFactory);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//初始化信息源，和国际化相关.</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initMessageSource();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//初始化容器事件传播器.</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initApplicationEventMulticaster();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//调用子类的某些特殊Bean初始化方法</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;onRefresh();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//为事件传播器注册事件监听器.</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;registerListeners();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//初始化所有剩余的单态Bean.</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finishBeanFactoryInitialization(beanFactory);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//初始化容器的生命周期事件处理器，并发布容器的生命周期事件</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finishRefresh();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(BeansException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//销毁以创建的单态Bean</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destroyBeans();&nbsp;&nbsp;</span></li><li class=""><span><span class="comment">//取消refresh操作，重置容器的同步标识.</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cancelRefresh(ex);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;ex;&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			//调用容器准备刷新的方法，获取容器的当时时间，同时给容器设置同步标识
+			prepareRefresh();
+			//告诉子类启动refreshBeanFactory()方法，Bean定义资源文件的载入从
+//子类的refreshBeanFactory()方法启动
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+//为BeanFactory配置容器特性，例如类加载器、事件处理器等
+			prepareBeanFactory(beanFactory);
+			try {
+				//为容器的某些子类指定特殊的BeanPost事件处理器
+				postProcessBeanFactory(beanFactory);
+				//调用所有注册的BeanFactoryPostProcessor的Bean
+				invokeBeanFactoryPostProcessors(beanFactory);
+				//为BeanFactory注册BeanPost事件处理器.
+				//BeanPostProcessor是Bean后置处理器，用于监听容器触发的事件
+				registerBeanPostProcessors(beanFactory);
+				//初始化信息源，和国际化相关.
+				initMessageSource();
+				//初始化容器事件传播器.
+				initApplicationEventMulticaster();
+				//调用子类的某些特殊Bean初始化方法
+				onRefresh();
+				//为事件传播器注册事件监听器.
+				registerListeners();
+				//初始化所有剩余的单态Bean.
+				finishBeanFactoryInitialization(beanFactory);
+				//初始化容器的生命周期事件处理器，并发布容器的生命周期事件
+				finishRefresh();
+			}
+			catch (BeansException ex) {
+				//销毁以创建的单态Bean
+				destroyBeans();
+//取消refresh操作，重置容器的同步标识.
+				cancelRefresh(ex);
+				throw ex;
+			}
+		}
+	}
+</textarea>&nbsp;</span></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"><span lang="EN-US">refresh()</span><span>方法主要为</span><span lang="EN-US">IoC</span><span>容器</span><span lang="EN-US">Bean</span><span>的生命周期管理提供条件，</span><span lang="EN-US">Spring IoC</span><span>容器载入</span><span lang="EN-US">Bean</span><span>定义资源文件从其子类容器的</span><span lang="EN-US">refreshBeanFactory</span><span lang="EN-US">()</span><span>方法启动，所以整个</span><span lang="EN-US">refresh()</span><span>中“</span><span lang="EN-US">ConfigurableListableBeanFactory
+ beanFactory =obtainFreshBeanFactory();</span><span>”这句以后代码的都是注册容器的信息源和生命周期事件，载入过程就是从这句代码启动。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">&nbsp;</span></p>
+<p class="MsoNormal"><span lang="EN-US">AbstractApplicationContext</span><span>的</span><span lang="EN-US">obtainFreshBeanFactory()</span><span>方法调用子类容器的</span><span lang="EN-US">refreshBeanFactory()</span><span>方法，启动容器载入</span><span lang="EN-US">Bean</span><span>定义资源文件的过程，代码如下：</span></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal" align="left"><strong><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 2110px; width: 19px; height: 18px; z-index: 99; "><embed id="ZeroClipboardMovie_3" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="18" name="ZeroClipboardMovie_3" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=3&amp;width=19&amp;height=18" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="keyword">protected</span><span>&nbsp;ConfigurableListableBeanFactory&nbsp;obtainFreshBeanFactory()&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span><span class="comment">//这里使用了委派设计模式，父类定义了抽象的refreshBeanFactory()方法，具//体实现调用子类容器的refreshBeanFactory()方法&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>refreshBeanFactory();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ConfigurableListableBeanFactory&nbsp;beanFactory&nbsp;=&nbsp;getBeanFactory();&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(logger.isDebugEnabled())&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logger.debug(<span class="string">"Bean&nbsp;factory&nbsp;for&nbsp;"</span><span>&nbsp;+&nbsp;getDisplayName()&nbsp;+&nbsp;</span><span class="string">":&nbsp;"</span><span>&nbsp;+&nbsp;beanFactory);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;beanFactory;&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+//这里使用了委派设计模式，父类定义了抽象的refreshBeanFactory()方法，具//体实现调用子类容器的refreshBeanFactory()方法		
+refreshBeanFactory();
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory);
+		}
+		return beanFactory;
+	}
+</textarea>&nbsp;</strong></p>
+<p class="MsoNormal" align="left">&nbsp;</p>
+<p class="MsoNormal"><span lang="EN-US">4.AbstractApplicationContext</span>子类的<a name="OLE_LINK153"></a><a name="OLE_LINK152"><span lang="EN-US">refreshBeanFactory()</span></a>方法：<span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">AbstractApplicationContext</span>类中只抽象定义了<span lang="EN-US">refreshBeanFactory()</span>方法，容器真正调用的是其子类<span lang="EN-US">AbstractRefreshableApplicationContext</span>实现的<span lang="EN-US">refreshBeanFactory()</span>方法，方法的源码如下：</p>
+<p class="MsoNormal"><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 2482px; width: 19px; height: 18px; z-index: 99; "><embed id="ZeroClipboardMovie_4" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="18" name="ZeroClipboardMovie_4" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=4&amp;width=19&amp;height=18" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="keyword">protected</span><span>&nbsp;</span><span class="keyword">final</span><span>&nbsp;</span><span class="keyword">void</span><span>&nbsp;refreshBeanFactory()&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeansException&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(hasBeanFactory())&nbsp;{</span><span class="comment">//如果已经有容器，销毁容器中的bean，关闭容器</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destroyBeans();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;closeBeanFactory();&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//创建IoC容器</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DefaultListableBeanFactory&nbsp;beanFactory&nbsp;=&nbsp;createBeanFactory();&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beanFactory.setSerializationId(getId());&nbsp;&nbsp;</span></li><li class=""><span><span class="comment">//对IoC容器进行定制化，如设置启动参数，开启注解的自动装配等</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;customizeBeanFactory(beanFactory);&nbsp;&nbsp;</span></li><li class=""><span><span class="comment">//调用载入Bean定义的方法，主要这里又使用了一个委派模式，在当前类中只定//义了抽象的loadBeanDefinitions方法，具体的实现调用子类容器</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loadBeanDefinitions(beanFactory);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">synchronized</span><span>&nbsp;(</span><span class="keyword">this</span><span>.beanFactoryMonitor)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">this</span><span>.beanFactory&nbsp;=&nbsp;beanFactory;&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(IOException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;ApplicationContextException(</span><span class="string">"I/O&nbsp;error&nbsp;parsing&nbsp;bean&nbsp;definition&nbsp;source&nbsp;for&nbsp;"</span><span>&nbsp;+&nbsp;getDisplayName(),&nbsp;ex);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">protected final void refreshBeanFactory() throws BeansException {
+		if (hasBeanFactory()) {//如果已经有容器，销毁容器中的bean，关闭容器
+			destroyBeans();
+			closeBeanFactory();
+		}
+		try {
+			//创建IoC容器
+			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			beanFactory.setSerializationId(getId());
+//对IoC容器进行定制化，如设置启动参数，开启注解的自动装配等
+			customizeBeanFactory(beanFactory);
+//调用载入Bean定义的方法，主要这里又使用了一个委派模式，在当前类中只定//义了抽象的loadBeanDefinitions方法，具体的实现调用子类容器
+			loadBeanDefinitions(beanFactory);
+			synchronized (this.beanFactoryMonitor) {
+				this.beanFactory = beanFactory;
+			}
+		}
+		catch (IOException ex) {
+			throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex);
+		}
+	}
+</textarea>&nbsp;</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"><span lang="EN-US">refresh()</span><span>方法的作用是：在创建</span><span lang="EN-US">IoC</span><span>容器前，如果已经有容器存在，则需要把已有的容器销毁和关闭，以保证在</span><span lang="EN-US">refresh</span><span>之后使用的是新建立起来的</span><span lang="EN-US">IoC</span><span>容器。</span><span lang="EN-US">refresh</span><span>的作用类似于对</span><span lang="EN-US">IoC</span><span>容器的重启，在新建立好的容器中对容器进行初始化，对</span><span lang="EN-US">Bean</span><span>定义资源进行载入。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>和</span><span lang="EN-US">refreshBeanFactory</span><span>方法类似，载入</span><span lang="EN-US">Bean</span><span>定义的方法</span><span lang="EN-US">loadBeanDefinitions</span><span>也使用了委派模式，在</span><span lang="EN-US">AbstractRefreshableApplicationContext</span><span>类中只定义了抽象方法，具体的实现调用子类容器中的方法实现。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">5.<a name="OLE_LINK155"></a><a name="OLE_LINK154"><span>AbstractRefreshableApplicationContext</span></a></span><span>子类的</span><span lang="EN-US">loadBeanDefinitions</span><span>方法：</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">AbstractRefreshableApplicationContext</span><span>中只定义了抽象的</span><span lang="EN-US">loadBeanDefinitions</span><span>方法，容器真正调用的是其子类</span><a name="OLE_LINK157"></a><a name="OLE_LINK156"><span><span lang="EN-US">AbstractXmlApplicationContext</span></span></a><span>对该方法的实现，</span><span lang="EN-US">AbstractXmlApplicationContext</span><span>的主要源码如下：</span></p>
+<p class="MsoNormal"><span><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 3207px; width: 19px; height: 19px; z-index: 99; "><embed id="ZeroClipboardMovie_5" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="19" name="ZeroClipboardMovie_5" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=5&amp;width=19&amp;height=19" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="keyword">public</span><span>&nbsp;</span><span class="keyword">abstract</span><span>&nbsp;</span><span class="keyword">class</span><span>&nbsp;AbstractXmlApplicationContext&nbsp;</span><span class="keyword">extends</span><span>&nbsp;AbstractRefreshableConfigApplicationContext&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>……&nbsp;&nbsp;</span></li><li class="alt"><span><span class="comment">//实现父类抽象的载入Bean定义方法</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="annotation">@Override</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">protected</span><span>&nbsp;</span><span class="keyword">void</span><span>&nbsp;loadBeanDefinitions(DefaultListableBeanFactory&nbsp;beanFactory)&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeansException,&nbsp;IOException&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//创建XmlBeanDefinitionReader，即创建Bean读取器，并通过回调设置到容器&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//中去，容器使用该读取器读取Bean定义资源</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;XmlBeanDefinitionReader&nbsp;beanDefinitionReader&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;XmlBeanDefinitionReader(beanFactory);&nbsp;&nbsp;</span></span></li><li class=""><span><span class="comment">//为Bean读取器设置Spring资源加载器，AbstractXmlApplicationContext的</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span><span class="comment">//祖先父类AbstractApplicationContext继承DefaultResourceLoader，因//此，容器本身也是一个资源加载器</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beanDefinitionReader.setResourceLoader(<span class="keyword">this</span><span>);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//为Bean读取器设置SAX&nbsp;xml解析器</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beanDefinitionReader.setEntityResolver(<span class="keyword">new</span><span>&nbsp;ResourceEntityResolver(</span><span class="keyword">this</span><span>));&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//当Bean读取器读取Bean定义的Xml资源文件时，启用Xml的校验机制</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initBeanDefinitionReader(beanDefinitionReader);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//Bean读取器真正实现加载的方法</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loadBeanDefinitions(beanDefinitionReader);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//Xml&nbsp;Bean读取器加载Bean定义资源</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">protected</span><span>&nbsp;</span><span class="keyword">void</span><span>&nbsp;loadBeanDefinitions(XmlBeanDefinitionReader&nbsp;reader)&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeansException,&nbsp;IOException&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//获取Bean定义资源的定位</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Resource[]&nbsp;configResources&nbsp;=&nbsp;getConfigResources();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(configResources&nbsp;!=&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//Xml&nbsp;Bean读取器调用其父类AbstractBeanDefinitionReader读取定位</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span><span class="comment">//的Bean定义资源</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reader.loadBeanDefinitions(configResources);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span><span class="comment">//如果子类中获取的Bean定义资源定位为空，则获取//FileSystemXmlApplicationContext构造方法中setConfigLocations方法设置的资源</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String[]&nbsp;configLocations&nbsp;=&nbsp;getConfigLocations();&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(configLocations&nbsp;!=&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//Xml&nbsp;Bean读取器调用其父类AbstractBeanDefinitionReader读取定位</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span><span class="comment">//的Bean定义资源</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reader.loadBeanDefinitions(configLocations);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//这里又使用了一个委托模式，调用子类的获取Bean定义资源定位的方法</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//该方法在ClassPathXmlApplicationContext中进行实现，对于我们</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//举例分析源码的FileSystemXmlApplicationContext没有使用该方法</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span><span class="keyword">protected</span><span>&nbsp;Resource[]&nbsp;getConfigResources()&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">null</span><span>;&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;&nbsp;……&nbsp;&nbsp;</span></li><li class="alt"><span>}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">public abstract class AbstractXmlApplicationContext extends AbstractRefreshableConfigApplicationContext {
+……
+//实现父类抽象的载入Bean定义方法
+	@Override
+	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
+		//创建XmlBeanDefinitionReader，即创建Bean读取器，并通过回调设置到容器		//中去，容器使用该读取器读取Bean定义资源
+		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+//为Bean读取器设置Spring资源加载器，AbstractXmlApplicationContext的
+//祖先父类AbstractApplicationContext继承DefaultResourceLoader，因//此，容器本身也是一个资源加载器
+		beanDefinitionReader.setResourceLoader(this);
+		//为Bean读取器设置SAX xml解析器
+		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
+		//当Bean读取器读取Bean定义的Xml资源文件时，启用Xml的校验机制
+		initBeanDefinitionReader(beanDefinitionReader);
+		//Bean读取器真正实现加载的方法
+		loadBeanDefinitions(beanDefinitionReader);
+	}
+	//Xml Bean读取器加载Bean定义资源
+	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+		//获取Bean定义资源的定位
+		Resource[] configResources = getConfigResources();
+		if (configResources != null) {
+			//Xml Bean读取器调用其父类AbstractBeanDefinitionReader读取定位
+//的Bean定义资源
+			reader.loadBeanDefinitions(configResources);
+		}
+//如果子类中获取的Bean定义资源定位为空，则获取//FileSystemXmlApplicationContext构造方法中setConfigLocations方法设置的资源
+		String[] configLocations = getConfigLocations();
+		if (configLocations != null) {
+			//Xml Bean读取器调用其父类AbstractBeanDefinitionReader读取定位
+//的Bean定义资源
+			reader.loadBeanDefinitions(configLocations);
+		}
+	}
+	//这里又使用了一个委托模式，调用子类的获取Bean定义资源定位的方法
+	//该方法在ClassPathXmlApplicationContext中进行实现，对于我们
+	//举例分析源码的FileSystemXmlApplicationContext没有使用该方法
+protected Resource[] getConfigResources() {
+		return null;
+	}	……
+}
+</textarea>&nbsp;</span></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"><a name="OLE_LINK172"></a><a name="OLE_LINK171"><span><span lang="EN-US">Xml Bean</span></span></a><span><span><span>读取器</span></span></span><span lang="EN-US">(</span><span lang="EN-US">XmlBeanDefinitionReader</span><span lang="EN-US">)</span><span>调用其父类</span><span lang="EN-US">AbstractBeanDefinitionReader</span><span>的</span><span>
+<span lang="EN-US">reader.loadBeanDefinitions</span></span><span>方法读取</span><span lang="EN-US">Bean</span><span>定义资源。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>由于我们使用</span><span lang="EN-US">FileSystemXmlApplicationContext</span><span>作为例子分析</span><span>，</span><span>因此</span><span lang="EN-US">getConfigResources</span><span>的返回值为</span><span lang="EN-US">null</span><span>，因此程序执行</span><span lang="EN-US">reader.loadBeanDefinitions(configLocations)</span><span>分支。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">6.</span><span lang="EN-US"> </span><a name="OLE_LINK182"></a><a name="OLE_LINK180"></a><a name="OLE_LINK179"><span><span><span lang="EN-US">AbstractBeanDefinitionReader</span></span></span></a><span>读取</span><span lang="EN-US">Bean</span><span>定义资源：</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><a name="OLE_LINK198"></a><a name="OLE_LINK197"><span><span lang="EN-US">AbstractBeanDefinitionReader</span></span></a><span><span><span>的</span></span></span><span><span><span lang="EN-US">loadBeanDefinitions</span></span></span><span><span><span>方法源码</span></span></span><span>如下：</span></p>
+<p class="MsoNormal"><span><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 4251px; width: 19px; height: 19px; z-index: 99; "><embed id="ZeroClipboardMovie_6" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="19" name="ZeroClipboardMovie_6" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=6&amp;width=19&amp;height=19" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="comment">//重载方法，调用下面的loadBeanDefinitions(String,&nbsp;Set&lt;Resource&gt;);方法</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;</span><span class="keyword">int</span><span>&nbsp;loadBeanDefinitions(String&nbsp;location)&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeanDefinitionStoreException&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;loadBeanDefinitions(location,&nbsp;</span><span class="keyword">null</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span><span class="keyword">public</span><span>&nbsp;</span><span class="keyword">int</span><span>&nbsp;loadBeanDefinitions(String&nbsp;location,&nbsp;Set&lt;Resource&gt;&nbsp;actualResources)&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeanDefinitionStoreException&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//获取在IoC容器初始化过程中设置的资源加载器</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ResourceLoader&nbsp;resourceLoader&nbsp;=&nbsp;getResourceLoader();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(resourceLoader&nbsp;==&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;BeanDefinitionStoreException(&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Cannot&nbsp;import&nbsp;bean&nbsp;definitions&nbsp;from&nbsp;location&nbsp;["</span><span>&nbsp;+&nbsp;location&nbsp;+&nbsp;</span><span class="string">"]:&nbsp;no&nbsp;ResourceLoader&nbsp;available"</span><span>);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(resourceLoader&nbsp;</span><span class="keyword">instanceof</span><span>&nbsp;ResourcePatternResolver)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//将指定位置的Bean定义资源文件解析为Spring&nbsp;IoC容器封装的资源</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//加载多个指定位置的Bean定义资源文件</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Resource[]&nbsp;resources&nbsp;=&nbsp;((ResourcePatternResolver)&nbsp;resourceLoader).getResources(location);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//委派调用其子类XmlBeanDefinitionReader的方法，实现加载功能</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">int</span><span>&nbsp;loadCount&nbsp;=&nbsp;loadBeanDefinitions(resources);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(actualResources&nbsp;!=&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span><span>&nbsp;(Resource&nbsp;resource&nbsp;:&nbsp;resources)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actualResources.add(resource);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(logger.isDebugEnabled())&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logger.debug(<span class="string">"Loaded&nbsp;"</span><span>&nbsp;+&nbsp;loadCount&nbsp;+&nbsp;</span><span class="string">"&nbsp;bean&nbsp;definitions&nbsp;from&nbsp;location&nbsp;pattern&nbsp;["</span><span>&nbsp;+&nbsp;location&nbsp;+&nbsp;</span><span class="string">"]"</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;loadCount;&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(IOException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;BeanDefinitionStoreException(&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Could&nbsp;not&nbsp;resolve&nbsp;bean&nbsp;definition&nbsp;resource&nbsp;pattern&nbsp;["</span><span>&nbsp;+&nbsp;location&nbsp;+&nbsp;</span><span class="string">"]"</span><span>,&nbsp;ex);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//将指定位置的Bean定义资源文件解析为Spring&nbsp;IoC容器封装的资源</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//加载单个指定位置的Bean定义资源文件</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Resource&nbsp;resource&nbsp;=&nbsp;resourceLoader.getResource(location);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//委派调用其子类XmlBeanDefinitionReader的方法，实现加载功能</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">int</span><span>&nbsp;loadCount&nbsp;=&nbsp;loadBeanDefinitions(resource);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(actualResources&nbsp;!=&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actualResources.add(resource);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(logger.isDebugEnabled())&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logger.debug(<span class="string">"Loaded&nbsp;"</span><span>&nbsp;+&nbsp;loadCount&nbsp;+&nbsp;</span><span class="string">"&nbsp;bean&nbsp;definitions&nbsp;from&nbsp;location&nbsp;["</span><span>&nbsp;+&nbsp;location&nbsp;+&nbsp;</span><span class="string">"]"</span><span>);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;loadCount;&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//重载方法，调用loadBeanDefinitions(String);</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;</span><span class="keyword">int</span><span>&nbsp;loadBeanDefinitions(String...&nbsp;locations)&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeanDefinitionStoreException&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assert.notNull(locations,&nbsp;<span class="string">"Location&nbsp;array&nbsp;must&nbsp;not&nbsp;be&nbsp;null"</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">int</span><span>&nbsp;counter&nbsp;=&nbsp;</span><span class="number">0</span><span>;&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span><span>&nbsp;(String&nbsp;location&nbsp;:&nbsp;locations)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;counter&nbsp;+=&nbsp;loadBeanDefinitions(location);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;counter;&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">//重载方法，调用下面的loadBeanDefinitions(String, Set&lt;Resource&gt;);方法
+	public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
+		return loadBeanDefinitions(location, null);
+	}
+public int loadBeanDefinitions(String location, Set&lt;Resource&gt; actualResources) throws BeanDefinitionStoreException {
+		//获取在IoC容器初始化过程中设置的资源加载器
+		ResourceLoader resourceLoader = getResourceLoader();
+		if (resourceLoader == null) {
+			throw new BeanDefinitionStoreException(
+					"Cannot import bean definitions from location [" + location + "]: no ResourceLoader available");
+		}
+		if (resourceLoader instanceof ResourcePatternResolver) {
+			try {
+				//将指定位置的Bean定义资源文件解析为Spring IoC容器封装的资源
+				//加载多个指定位置的Bean定义资源文件
+				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
+				//委派调用其子类XmlBeanDefinitionReader的方法，实现加载功能
+				int loadCount = loadBeanDefinitions(resources);
+				if (actualResources != null) {
+					for (Resource resource : resources) {
+						actualResources.add(resource);
+					}
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Loaded " + loadCount + " bean definitions from location pattern [" + location + "]");
+				}
+				return loadCount;
+			}
+			catch (IOException ex) {
+				throw new BeanDefinitionStoreException(
+						"Could not resolve bean definition resource pattern [" + location + "]", ex);
+			}
+		}
+		else {
+			//将指定位置的Bean定义资源文件解析为Spring IoC容器封装的资源
+			//加载单个指定位置的Bean定义资源文件
+			Resource resource = resourceLoader.getResource(location);
+			//委派调用其子类XmlBeanDefinitionReader的方法，实现加载功能
+			int loadCount = loadBeanDefinitions(resource);
+			if (actualResources != null) {
+				actualResources.add(resource);
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded " + loadCount + " bean definitions from location [" + location + "]");
+			}
+			return loadCount;
+		}
+	}
+	//重载方法，调用loadBeanDefinitions(String);
+	public int loadBeanDefinitions(String... locations) throws BeanDefinitionStoreException {
+		Assert.notNull(locations, "Location array must not be null");
+		int counter = 0;
+		for (String location : locations) {
+			counter += loadBeanDefinitions(location);
+		}
+		return counter;
+	}
+</textarea>&nbsp;</span></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal" align="left"><span lang="EN-US">loadBeanDefinitions(Resource...resources)</span><span>方法和上面分析的</span><span lang="EN-US">3</span><span>个方法类似，同样也是调用</span><a name="OLE_LINK216"></a><a name="OLE_LINK215"><span><span lang="EN-US">XmlBeanDefinitionReader</span></span></a><span>的</span><span lang="EN-US">loadBeanDefinitions</span><span>方法。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>从对</span><span lang="EN-US">AbstractBeanDefinitionReader</span><span>的</span><span lang="EN-US">loadBeanDefinitions</span><span>方法源码分析可以看出该方法做了以下两件事：</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>首先，调用资源加载器的获取资源方法</span><span lang="EN-US">resourceLoader.getResource(location)</span><span>，</span><span>获取到要加载的资源。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>其次，真正执行加载功能是其子类</span><a name="OLE_LINK225"></a><a name="OLE_LINK224"><span><span lang="EN-US">XmlBeanDefinitionReader</span></span></a><span><span><span>的</span></span></span><span><span><span lang="EN-US">loadBeanDefinitions</span></span></span><span><span><span>方法</span></span></span><span>。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">7.</span><span>资源加载器获取要读入的资源：</span><span lang="EN-US"></span></p>
+<p>&nbsp;</p>
+<p class="MsoNormal"><span lang="EN-US">XmlBeanDefinitionReader</span><span>通过调用其父类</span><a name="OLE_LINK217"><span lang="EN-US">DefaultResourceLoader</span></a><span>的</span><span lang="EN-US">getResource</span><span>方法获取要加载的资源，其源码如下：</span></p>
+<p class="MsoNormal"><span><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 5618px; width: 19px; height: 18px; z-index: 99; "><embed id="ZeroClipboardMovie_7" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="18" name="ZeroClipboardMovie_7" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=7&amp;width=19&amp;height=18" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="comment">//获取Resource的具体实现方法</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span><span class="keyword">public</span><span>&nbsp;Resource&nbsp;getResource(String&nbsp;location)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assert.notNull(location,&nbsp;<span class="string">"Location&nbsp;must&nbsp;not&nbsp;be&nbsp;null"</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//这里除了带有classpath标识的Resource</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(location.startsWith(CLASSPATH_URL_PREFIX))&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()),&nbsp;getClassLoader());&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//这里处理URL标识的Resource定位</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL&nbsp;url&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;URL(location);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;UrlResource(url);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(MalformedURLException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//如果既不是classpath标识，又不是URL标识的Resource定位，则调用</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//容器本身的getResourceByPath方法获取Resource</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;getResourceByPath(location);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">//获取Resource的具体实现方法
+public Resource getResource(String location) {
+		Assert.notNull(location, "Location must not be null");
+		//这里除了带有classpath标识的Resource
+		if (location.startsWith(CLASSPATH_URL_PREFIX)) {
+			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
+		}
+		else {
+			try {
+				//这里处理URL标识的Resource定位
+				URL url = new URL(location);
+				return new UrlResource(url);
+			}
+			catch (MalformedURLException ex) {
+				//如果既不是classpath标识，又不是URL标识的Resource定位，则调用
+				//容器本身的getResourceByPath方法获取Resource
+				return getResourceByPath(location);
+			}
+		}
+	}
+</textarea>&nbsp;</span></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"><span lang="EN-US">FileSystemXmlApplicationContext</span><span>容器提供了</span><span lang="EN-US">getResourceByPath</span><span>方法的实现，就是为了处理既不是</span><span lang="EN-US">classpath</span><span>标识，又不是</span><span lang="EN-US">URL</span><span>标识的</span><span lang="EN-US">Resource</span><span>定位这种情况。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>现在，</span><span lang="EN-US">Bean</span><span>定义的</span><span lang="EN-US">Resource</span><span>得到了，下面我们继续跟随程序执行方向，分析</span><a name="OLE_LINK226"><span lang="EN-US">XmlBeanDefinitionReader</span></a><span>的</span><span lang="EN-US">loadBeanDefinitions</span><span>方法。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">8.<span> <a name="OLE_LINK228"></a><a name="OLE_LINK227"><span>XmlBeanDefinitionReader</span></a></span></span><span>加载</span><span lang="EN-US">Bean</span><span>定义资源：</span></p>
+<p class="MsoNormal"><span><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 6232px; width: 19px; height: 18px; z-index: 99; "><embed id="ZeroClipboardMovie_8" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="18" name="ZeroClipboardMovie_8" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=8&amp;width=19&amp;height=18" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="comment">//XmlBeanDefinitionReader加载资源的入口方法</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span><span class="keyword">public</span><span>&nbsp;</span><span class="keyword">int</span><span>&nbsp;loadBeanDefinitions(Resource&nbsp;resource)&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeanDefinitionStoreException&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//将读入的XML资源进行特殊编码处理</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;loadBeanDefinitions(</span><span class="keyword">new</span><span>&nbsp;EncodedResource(resource));&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span><span class="comment">//这里是载入XML形式Bean定义资源文件方法</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;</span><span class="keyword">int</span><span>&nbsp;loadBeanDefinitions(EncodedResource&nbsp;encodedResource)&nbsp;</span><span class="keyword">throws</span><span>&nbsp;BeanDefinitionStoreException&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assert.notNull(encodedResource,&nbsp;<span class="string">"EncodedResource&nbsp;must&nbsp;not&nbsp;be&nbsp;null"</span><span>);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(logger.isInfoEnabled())&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logger.info(<span class="string">"Loading&nbsp;XML&nbsp;bean&nbsp;definitions&nbsp;from&nbsp;"</span><span>&nbsp;+&nbsp;encodedResource.getResource());&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//这里是获取线程局部变量</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set&lt;EncodedResource&gt;&nbsp;currentResources&nbsp;=&nbsp;<span class="keyword">this</span><span>.resourcesCurrentlyBeingLoaded.get();&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(currentResources&nbsp;==&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currentResources&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;HashSet&lt;EncodedResource&gt;(</span><span class="number">4</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">this</span><span>.resourcesCurrentlyBeingLoaded.set(currentResources);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(!currentResources.add(encodedResource))&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;BeanDefinitionStoreException(&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Detected&nbsp;cyclic&nbsp;loading&nbsp;of&nbsp;"</span><span>&nbsp;+&nbsp;encodedResource&nbsp;+&nbsp;</span><span class="string">"&nbsp;-&nbsp;check&nbsp;your&nbsp;import&nbsp;definitions!"</span><span>);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//将资源文件转换为IO输入流</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;InputStream&nbsp;inputStream&nbsp;=&nbsp;encodedResource.getResource().getInputStream();&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;InputSource&nbsp;inputSource&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;InputSource(inputStream);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(encodedResource.getEncoding()&nbsp;!=&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inputSource.setEncoding(encodedResource.getEncoding());&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//具体读取过程的方法</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;doLoadBeanDefinitions(inputSource,&nbsp;encodedResource.getResource());&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">finally</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inputStream.close();&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(IOException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;BeanDefinitionStoreException(&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"IOException&nbsp;parsing&nbsp;XML&nbsp;document&nbsp;from&nbsp;"</span><span>&nbsp;+&nbsp;encodedResource.getResource(),&nbsp;ex);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">finally</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currentResources.remove(encodedResource);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(currentResources.isEmpty())&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">this</span><span>.resourcesCurrentlyBeingLoaded.remove();&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span><span class="comment">//从特定XML文件中实际载入Bean定义资源的方法</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span><span class="keyword">protected</span><span>&nbsp;</span><span class="keyword">int</span><span>&nbsp;doLoadBeanDefinitions(InputSource&nbsp;inputSource,&nbsp;Resource&nbsp;resource)&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throws</span><span>&nbsp;BeanDefinitionStoreException&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">int</span><span>&nbsp;validationMode&nbsp;=&nbsp;getValidationModeForResource(resource);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//将XML文件转换为DOM对象，解析过程由documentLoader实现</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document&nbsp;doc&nbsp;=&nbsp;<span class="keyword">this</span><span>.documentLoader.loadDocument(&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inputSource,&nbsp;getEntityResolver(),&nbsp;<span class="keyword">this</span><span>.errorHandler,&nbsp;validationMode,&nbsp;isNamespaceAware());&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//这里是启动对Bean定义解析的详细过程，该解析过程会用到Spring的Bean</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//配置规则</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;registerBeanDefinitions(doc,&nbsp;resource);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(BeanDefinitionStoreException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;ex;&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(SAXParseException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;XmlBeanDefinitionStoreException(resource.getDescription(),&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Line&nbsp;"</span><span>&nbsp;+&nbsp;ex.getLineNumber()&nbsp;+&nbsp;</span><span class="string">"&nbsp;in&nbsp;XML&nbsp;document&nbsp;from&nbsp;"</span><span>&nbsp;+&nbsp;resource&nbsp;+&nbsp;</span><span class="string">"&nbsp;is&nbsp;invalid"</span><span>,&nbsp;ex);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(SAXException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;XmlBeanDefinitionStoreException(resource.getDescription(),&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"XML&nbsp;document&nbsp;from&nbsp;"</span><span>&nbsp;+&nbsp;resource&nbsp;+&nbsp;</span><span class="string">"&nbsp;is&nbsp;invalid"</span><span>,&nbsp;ex);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(ParserConfigurationException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;BeanDefinitionStoreException(resource.getDescription(),&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Parser&nbsp;configuration&nbsp;exception&nbsp;parsing&nbsp;XML&nbsp;from&nbsp;"</span><span>&nbsp;+&nbsp;resource,&nbsp;ex);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(IOException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;BeanDefinitionStoreException(resource.getDescription(),&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"IOException&nbsp;parsing&nbsp;XML&nbsp;document&nbsp;from&nbsp;"</span><span>&nbsp;+&nbsp;resource,&nbsp;ex);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(Throwable&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;</span><span class="keyword">new</span><span>&nbsp;BeanDefinitionStoreException(resource.getDescription(),&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Unexpected&nbsp;exception&nbsp;parsing&nbsp;XML&nbsp;document&nbsp;from&nbsp;"</span><span>&nbsp;+&nbsp;resource,&nbsp;ex);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">//XmlBeanDefinitionReader加载资源的入口方法
+public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
+		//将读入的XML资源进行特殊编码处理
+		return loadBeanDefinitions(new EncodedResource(resource));
+	}
+//这里是载入XML形式Bean定义资源文件方法
+	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
+		Assert.notNull(encodedResource, "EncodedResource must not be null");
+		if (logger.isInfoEnabled()) {
+			logger.info("Loading XML bean definitions from " + encodedResource.getResource());
+		}
+		//这里是获取线程局部变量
+		Set&lt;EncodedResource&gt; currentResources = this.resourcesCurrentlyBeingLoaded.get();
+		if (currentResources == null) {
+			currentResources = new HashSet&lt;EncodedResource&gt;(4);
+			this.resourcesCurrentlyBeingLoaded.set(currentResources);
+		}
+		if (!currentResources.add(encodedResource)) {
+			throw new BeanDefinitionStoreException(
+					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
+		}
+		try {
+			//将资源文件转换为IO输入流
+			InputStream inputStream = encodedResource.getResource().getInputStream();
+			try {
+				InputSource inputSource = new InputSource(inputStream);
+				if (encodedResource.getEncoding() != null) {
+					inputSource.setEncoding(encodedResource.getEncoding());
+				}
+				//具体读取过程的方法
+				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
+			}
+			finally {
+				inputStream.close();
+			}
+		}
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException(
+					"IOException parsing XML document from " + encodedResource.getResource(), ex);
+		}
+		finally {
+			currentResources.remove(encodedResource);
+			if (currentResources.isEmpty()) {
+				this.resourcesCurrentlyBeingLoaded.remove();
+			}
+		}
+	}
+//从特定XML文件中实际载入Bean定义资源的方法
+protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource)
+			throws BeanDefinitionStoreException {
+		try {
+			int validationMode = getValidationModeForResource(resource);
+			//将XML文件转换为DOM对象，解析过程由documentLoader实现
+			Document doc = this.documentLoader.loadDocument(
+					inputSource, getEntityResolver(), this.errorHandler, validationMode, isNamespaceAware());
+			//这里是启动对Bean定义解析的详细过程，该解析过程会用到Spring的Bean
+			//配置规则
+			return registerBeanDefinitions(doc, resource);
+		}
+		catch (BeanDefinitionStoreException ex) {
+			throw ex;
+		}
+		catch (SAXParseException ex) {
+			throw new XmlBeanDefinitionStoreException(resource.getDescription(),
+					"Line " + ex.getLineNumber() + " in XML document from " + resource + " is invalid", ex);
+		}
+		catch (SAXException ex) {
+			throw new XmlBeanDefinitionStoreException(resource.getDescription(),
+					"XML document from " + resource + " is invalid", ex);
+		}
+		catch (ParserConfigurationException ex) {
+			throw new BeanDefinitionStoreException(resource.getDescription(),
+					"Parser configuration exception parsing XML from " + resource, ex);
+		}
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException(resource.getDescription(),
+					"IOException parsing XML document from " + resource, ex);
+		}
+		catch (Throwable ex) {
+			throw new BeanDefinitionStoreException(resource.getDescription(),
+					"Unexpected exception parsing XML document from " + resource, ex);
+		}
+	}
+</textarea>&nbsp;</span></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"><span><span>&nbsp;</span></span><span>通过源码分析，载入</span><span lang="EN-US">Bean</span><span>定义资源文件的最后一步是将</span><span lang="EN-US">Bean</span><span>定义资源转换为</span><span lang="EN-US">Document</span><span>对象，该过程由</span><a name="OLE_LINK232"></a><a name="OLE_LINK231"><span><span lang="EN-US">documentLoader</span></span></a><span>实现。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">9. DocumentLoader</span><span>将</span><span lang="EN-US">Bean</span><span>定义资源转换为</span><span lang="EN-US">Document</span><span>对象：</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">DocumentLoader</span><span>将</span><span lang="EN-US">Bean</span><span>定义资源转换成</span><span lang="EN-US">Document</span><span>对象的源码如下：</span></p>
+<p class="MsoNormal"><span><div class="dp-highlighter bg_java"><div class="bar"><div class="tools"><b>[java]</b> <a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="ViewSource" title="view plain" onclick="dp.sh.Toolbar.Command(&#39;ViewSource&#39;,this);return false;">view plain</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="CopyToClipboard" title="copy" onclick="dp.sh.Toolbar.Command(&#39;CopyToClipboard&#39;,this);return false;">copy</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="PrintSource" title="print" onclick="dp.sh.Toolbar.Command(&#39;PrintSource&#39;,this);return false;">print</a><a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="About" title="?" onclick="dp.sh.Toolbar.Command(&#39;About&#39;,this);return false;">?</a><div style="position: absolute; left: 374px; top: 7928px; width: 19px; height: 19px; z-index: 99; "><embed id="ZeroClipboardMovie_9" src="http://static.blog.csdn.net/scripts/ZeroClipboard/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" width="19" height="19" name="ZeroClipboardMovie_9" align="middle" allowscriptaccess="always" allowfullscreen="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="id=9&amp;width=19&amp;height=19" wmode="transparent"></div></div></div><ol start="1" class="dp-j"><li class="alt"><span><span class="comment">//使用标准的JAXP将载入的Bean定义资源转换成document对象</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span><span class="keyword">public</span><span>&nbsp;Document&nbsp;loadDocument(InputSource&nbsp;inputSource,&nbsp;EntityResolver&nbsp;entityResolver,&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ErrorHandler&nbsp;errorHandler,&nbsp;<span class="keyword">int</span><span>&nbsp;validationMode,&nbsp;</span><span class="keyword">boolean</span><span>&nbsp;namespaceAware)&nbsp;</span><span class="keyword">throws</span><span>&nbsp;Exception&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//创建文件解析器工厂</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DocumentBuilderFactory&nbsp;factory&nbsp;=&nbsp;createDocumentBuilderFactory(validationMode,&nbsp;namespaceAware);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(logger.isDebugEnabled())&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logger.debug(<span class="string">"Using&nbsp;JAXP&nbsp;provider&nbsp;["</span><span>&nbsp;+&nbsp;factory.getClass().getName()&nbsp;+&nbsp;</span><span class="string">"]"</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//创建文档解析器</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DocumentBuilder&nbsp;builder&nbsp;=&nbsp;createDocumentBuilder(factory,&nbsp;entityResolver,&nbsp;errorHandler);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//解析Spring的Bean定义资源</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;builder.parse(inputSource);&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span><span class="keyword">protected</span><span>&nbsp;DocumentBuilderFactory&nbsp;createDocumentBuilderFactory(</span><span class="keyword">int</span><span>&nbsp;validationMode,&nbsp;</span><span class="keyword">boolean</span><span>&nbsp;namespaceAware)&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throws</span><span>&nbsp;ParserConfigurationException&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//创建文档解析工厂</span><span>&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DocumentBuilderFactory&nbsp;factory&nbsp;=&nbsp;DocumentBuilderFactory.newInstance();&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;factory.setNamespaceAware(namespaceAware);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//设置解析XML的校验</span><span>&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(validationMode&nbsp;!=&nbsp;XmlValidationModeDetector.VALIDATION_NONE)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;factory.setValidating(<span class="keyword">true</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(validationMode&nbsp;==&nbsp;XmlValidationModeDetector.VALIDATION_XSD)&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;factory.setNamespaceAware(<span class="keyword">true</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE,&nbsp;XSD_SCHEMA_LANGUAGE);&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">catch</span><span>&nbsp;(IllegalArgumentException&nbsp;ex)&nbsp;{&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ParserConfigurationException&nbsp;pcex&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;ParserConfigurationException(&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Unable&nbsp;to&nbsp;validate&nbsp;using&nbsp;XSD:&nbsp;Your&nbsp;JAXP&nbsp;provider&nbsp;["</span><span>&nbsp;+&nbsp;factory&nbsp;+&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"]&nbsp;does&nbsp;not&nbsp;support&nbsp;XML&nbsp;Schema.&nbsp;Are&nbsp;you&nbsp;running&nbsp;on&nbsp;Java&nbsp;1.4&nbsp;with&nbsp;Apache&nbsp;Crimson?&nbsp;"</span><span>&nbsp;+&nbsp;&nbsp;</span></span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"Upgrade&nbsp;to&nbsp;Apache&nbsp;Xerces&nbsp;(or&nbsp;Java&nbsp;1.5)&nbsp;for&nbsp;full&nbsp;XSD&nbsp;support."</span><span>);&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pcex.initCause(ex);&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;pcex;&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li class="alt"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;factory;&nbsp;&nbsp;</span></span></li><li class=""><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li></ol></div><textarea cols="50" rows="15" name="code" class="java" style="display: none; ">//使用标准的JAXP将载入的Bean定义资源转换成document对象
+public Document loadDocument(InputSource inputSource, EntityResolver entityResolver,
+			ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
+		//创建文件解析器工厂
+		DocumentBuilderFactory factory = createDocumentBuilderFactory(validationMode, namespaceAware);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Using JAXP provider [" + factory.getClass().getName() + "]");
+		}
+		//创建文档解析器
+		DocumentBuilder builder = createDocumentBuilder(factory, entityResolver, errorHandler);
+		//解析Spring的Bean定义资源
+		return builder.parse(inputSource);
+	}
+protected DocumentBuilderFactory createDocumentBuilderFactory(int validationMode, boolean namespaceAware)
+			throws ParserConfigurationException {
+		//创建文档解析工厂
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(namespaceAware);
+		//设置解析XML的校验
+		if (validationMode != XmlValidationModeDetector.VALIDATION_NONE) {
+			factory.setValidating(true);
+			if (validationMode == XmlValidationModeDetector.VALIDATION_XSD) {
+				factory.setNamespaceAware(true);
+				try {
+					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
+				}
+				catch (IllegalArgumentException ex) {
+					ParserConfigurationException pcex = new ParserConfigurationException(
+							"Unable to validate using XSD: Your JAXP provider [" + factory +
+							"] does not support XML Schema. Are you running on Java 1.4 with Apache Crimson? " +
+							"Upgrade to Apache Xerces (or Java 1.5) for full XSD support.");
+					pcex.initCause(ex);
+					throw pcex;
+				}
+			}
+		}
+		return factory;
+	}
+</textarea>&nbsp;</span></p>
+<p class="MsoNormal"><span></span></p>
+<p class="MsoNormal"><span>该解析过程调用</span><span lang="EN-US">JavaEE</span><span>标准的</span><span lang="EN-US">JAXP</span><span>标准进行处理。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>至此</span><span lang="EN-US">Spring IoC</span><span>容器根据定位的</span><span lang="EN-US">Bean</span><span>定义资源文件，将其加载读入并转换成为</span><span lang="EN-US">Document</span><span>对象过程完成。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">10.</span><span>看源代码的个人心得总结：</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>通过这几天看源码，个人总结一些心得：代码毕竟不是文章，不能从头到尾详细看，个人觉得看源码比较好的方法是：</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>首先，先实现一个简单例子调用源码，让整个应用能简单跑起来。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>然后，在进入代码最开始的地方打一个调试断点，使用</span><span lang="EN-US">Debug</span><span>工具进行单步调试，直到跑完所有流程。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>通过调试就可以理解整个代码的工作流程和调用顺序，有助于理清思路，理解其大概的设计思想。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span lang="EN-US">Spring</span><span>代码的确实比较复杂，代码中大量使用了设计模式，另外为了解耦合，代码的分工比较明确，对象也非常的多，对于没有分析源码经验的人来说，阅读代码发现其跨度和跳转非常大，难度和挑战比较大。</span><span lang="EN-US"></span></p>
+<p class="MsoNormal"><span>我也是第一次分析</span><span lang="EN-US">Spring</span><span>源码，希望和大家一起学习探讨。</span><span lang="EN-US"></span></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p class="MsoNormal"><span lang="EN-US"><br>
+</span></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</div>
+
+
+
+
+<!-- Baidu Button BEGIN -->
+
+<div class="bdsharebuttonbox bdshare-button-style0-16" style="float: right;" data-bd-bind="1409139413323">
+<a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="bds_more" data-cmd="more" style="background-position:0 0 !important; background-image: url(http://bdimg.share.baidu.com/static/api/img/share/icons_0_16.png?v=d754dcc0.png) !important"></a>
+<a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间" style="background-position:0 -52px !important"></a>
+<a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博" style="background-position:0 -104px !important"></a>
+<a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博" style="background-position:0 -260px !important"></a>
+<a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="bds_renren" data-cmd="renren" title="分享到人人网" style="background-position:0 -208px !important"></a>
+<a href="http://blog.csdn.net/chjttony/article/details/6259723#" class="bds_weixin" data-cmd="weixin" title="分享到微信" style="background-position:0 -1612px !important"></a>
+</div>
+<script>window._bd_share_config = { "common": { "bdSnsKey": {}, "bdText": "", "bdMini": "1", "bdMiniList": false, "bdPic": "", "bdStyle": "0", "bdSize": "16" }, "share": {} }; with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];</script>
+<!-- Baidu Button END -->
+
+<!--192.168.100.33-->
+<ul class="article_next_prev">
+            <li class="prev_article"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_shangyipian&#39;]);location.href=&#39;/chjttony/article/details/6256709&#39;;">上一篇</span><a href="http://blog.csdn.net/chjttony/article/details/6256709" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_shangyipian&#39;])">《Spring技术内幕》学习笔记2——IoC定位Bean定义资源</a></li>
+            <li class="next_article"><span onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_xiayipian&#39;]);location.href=&#39;/chjttony/article/details/6261708&#39;;">下一篇</span><a href="http://blog.csdn.net/chjttony/article/details/6261708" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_xiayipian&#39;])">《Spring技术内幕》学习笔记4——IoC容器解析Bean定义资源并注册解析后的Bean</a></li>
+</ul>
+
+<!-- Baidu Button BEGIN -->
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=1536434" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/bds_s_v2.js"></script>
+
+<script type="text/javascript">
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+
+</div>
+      <dl class="blog-associat-tag">
+        <dt>主题推荐</dt>
+        <dd>
+                <a href="http://www.csdn.net/tag/%E6%8A%80%E6%9C%AF" target="_blank" class="blog-tage-red">技术</a> 
+                <a href="http://www.csdn.net/tag/spring" target="_blank" class="blog-tage-red">spring</a> 
+                <a href="http://www.csdn.net/tag/ioc" target="_blank" class="blog-tage-red">ioc</a> 
+                <a href="http://www.csdn.net/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" target="_blank" class="blog-tage-red">设计模式</a> 
+                <a href="http://www.csdn.net/tag/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" target="_blank" class="blog-tage-red">数据结构</a> 
+        </dd>
+    </dl> 
+
+
+<dl class="blog-ass-articl tracking-ad" data-mod="popu_36" id="res-relatived"> 
+     <dt><span>猜你在找</span></dt>    
+<dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/chjttony/article/details/6256709" title="《Spring技术内幕》学习笔记2——IoC定位Bean定义资源" strategy="CFRecommendAlgorithm" target="_blank">《Spring技术内幕》学习笔记2——IoC定位Bean定义资源</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/u012727078/article/details/17606661" title="Web环境中Spring的启动过程" strategy="CFRecommendAlgorithm" target="_blank">Web环境中Spring的启动过程</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/iamcai723/article/details/8145423" title="【服务端】hibernate中文模糊查询" strategy="CFRecommendAlgorithm" target="_blank">【服务端】hibernate中文模糊查询</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/chjttony/article/details/7669001" title="WebSphere8简介" strategy="CFRecommendAlgorithm" target="_blank">WebSphere8简介</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/liu251/article/details/4057140" title="如何读取JAR包中的资源文件（如XML、TXT等）" strategy="CFRecommendAlgorithm" target="_blank">如何读取JAR包中的资源文件（如XML、TXT等）</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/chszs/article/details/6292719" title="MyBatis 3的Bug" strategy="CFRecommendAlgorithm" target="_blank">MyBatis 3的Bug</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/steryzone/article/details/6792556" title="无法对自定义的securityMetadataSource进行注入" strategy="CFRecommendAlgorithm" target="_blank">无法对自定义的securityMetadataSource进行注入</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/xiazdong/article/details/6900480" title="Servlet开发(2)-----过滤器和监听器" strategy="CFRecommendAlgorithm" target="_blank">Servlet开发(2)-----过滤器和监听器</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/mazhimazh/article/details/17684701" title="Java 7之基础类型第3篇 - Java整数类型（2）" strategy="CFRecommendAlgorithm" target="_blank">Java 7之基础类型第3篇 - Java整数类型（2）</a></dd><dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="http://blog.csdn.net/meteorlWJ/article/details/4319988" title="FLEX实践—动态切换应用皮肤" strategy="CFRecommendAlgorithm" target="_blank">FLEX实践—动态切换应用皮肤</a></dd></dl>
+
+<script type="text/javascript">
+    var searchtitletags = '《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件' + ',' + '技术,spring,ioc,设计模式,数据结构';
+    searchService({
+        index: 'blog',
+        query: searchtitletags,
+        from: 10,
+        size: 10,
+        appendTo: '#res-relatived',
+        url: 'recommend',
+        his: 2,
+        client: "blog_cf_enhance",
+        tmpl: '<dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="#{ url }" title="#{ title }" strategy="#{ strategy }">#{ title }</a></dd>'
+    });
+
+ </script>   
+
+
+    <div id="ad_cen">
+   
+          <script type="text/javascript">
+              new Ad(4, 'ad_cen');
+          </script>
+    <iframe id="ad_frm_0" frameborder="0" scrolling="no" style="border-width: 0px; overflow: hidden; width: 790px; height: 90px; " src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ad(1).htm"></iframe></div>
+<div class="comment_class">
+    <div id="comment_title" class="panel_head">
+        <span class="see_comment">查看评论</span><a name="comments"></a></div>
+    <div id="comment_list"><br>&nbsp;&nbsp;暂无评论<br><br><div class="clear"></div></div>
+    <div id="comment_bar">
+    </div>
+    <div id="comment_form"><div class="guest_link">您还没有登录,请<a href="javascript:void(0);" onclick="javascript:csdn.showLogin(function (dat) {js_logined(dat.data.userName);});">[登录]</a>或<a href="http://passport.csdn.net/account/register?from=http%3A%2F%2Fblog.csdn.net%2Fchjttony%2Farticle%2Fdetails%2F6259723">[注册]</a></div></div>
+
+    <div class="announce">
+        * 以上用户言论只代表其个人观点，不代表CSDN网站的观点或立场<a name="reply"></a><a name="quote"></a></div>
+</div>
+
+<script type="text/javascript">
+    var fileName = '6259723';
+    var commentscount = 0;
+    var islock = false
+</script>
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/comment.js"></script>
+    <div id="ad_bot">
+    <iframe id="ad_frm_1" frameborder="0" scrolling="no" style="border-width: 0px; overflow: hidden; width: 790px; height: 0px; " src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ad(2).htm"></iframe></div>
+    <script type="text/javascript">
+    new Ad(5, 'ad_bot');
+    </script>
+<div id="report_dialog">
+</div>
+
+<div id="d-top" style="bottom:60px;">
+      
+
+       <a id="quick-reply" class="btn btn-top q-reply" title="快速回复" style="display:none;">
+            <img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/blog-icon-reply.png" alt="快速回复">
+        </a>    
+
+    <a id="d-top-a" class="btn btn-top backtop" style="" title="返回顶部" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_huidaodingbu&#39;])">         
+         <img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/top.png" alt="TOP">
+    </a>
+</div>
+<script type="text/javascript">
+    $(function ()
+    {
+        $("#ad_frm_0").height("90px");
+        
+        setTimeout(function(){
+            $("#ad_frm_2").height("200px");
+        },1000);
+        
+
+        if($("#comment_content").length>0)
+        {
+            $("#quick-reply").show();
+
+            $("#quick-reply").click(function(){
+                setEditorFocus();
+            });
+        }       
+     
+        var d_top = $('#d-top-a');
+        document.onscroll = function ()
+        {
+            var scrTop = (document.body.scrollTop || document.documentElement.scrollTop);
+            if (scrTop > 500)
+            {
+                d_top.show();
+            } else
+            {
+                d_top.hide();
+            }
+        }
+        $('#d-top-a').click(function ()
+        {
+            scrollTo(0, 0);
+            this.blur();
+            return false;
+        });
+    });
+  
+</script>
+<style type="text/css">
+    .tag_list
+    {
+        background: none repeat scroll 0 0 #FFFFFF;
+        border: 1px solid #D7CBC1;
+        color: #000000;
+        font-size: 12px;
+        line-height: 20px;
+        list-style: none outside none;
+        margin: 10px 2% 0 1%;
+        padding: 1px;
+    }
+    .tag_list h5
+    {
+        background: none repeat scroll 0 0 #E0DBD3;
+        color: #47381C;
+        font-size: 12px;
+        height: 24px;
+        line-height: 24px;
+        padding: 0 5px;
+        margin: 0;
+    }
+    .tag_list h5 a
+    {
+        color: #47381C;
+    }
+    .classify
+    {
+        margin: 10px 0;
+        padding: 4px 12px 8px;
+    }
+    .classify a
+    {
+        margin-right: 20px;
+        white-space: nowrap;
+    }
+</style>
+<div class="tag_list">
+    <h5>
+        <a href="http://www.csdn.net/tag/" target="_blank">核心技术类目</a></h5>
+    <div class="classify">
+<a title="全部主题" href="http://www.csdn.net/tag" target="_blank" onclick="LogClickCount(this,336);">全部主题</a>
+<a title="Hadoop" href="http://g.csdn.net/5272865" target="_blank" onclick="LogClickCount(this,336);">Hadoop</a>
+<a title="AWS" href="http://g.csdn.net/5272866" target="_blank" onclick="LogClickCount(this,336);">AWS</a>
+<a title="移动游戏" href="http://g.csdn.net/5272870" target="_blank" onclick="LogClickCount(this,336);">移动游戏</a>
+<a title="Java" href="http://g.csdn.net/5272871" target="_blank" onclick="LogClickCount(this,336);">Java</a>
+<a title="Android" href="http://g.csdn.net/5272872" target="_blank" onclick="LogClickCount(this,336);">Android</a>
+<a title="iOS" href="http://g.csdn.net/5272873" target="_blank" onclick="LogClickCount(this,336);">iOS</a>
+<a title="Swift" href="http://g.csdn.net/5272868" target="_blank" onclick="LogClickCount(this,336);">Swift</a>
+<a title="智能硬件" href="http://g.csdn.net/5272869" target="_blank" onclick="LogClickCount(this,336);">智能硬件</a>
+<a title="Docker" href="http://g.csdn.net/5272867" target="_blank" onclick="LogClickCount(this,336);">Docker</a>
+<a title="OpenStack" href="http://g.csdn.net/5272925" target="_blank" onclick="LogClickCount(this,336);">OpenStack</a>
+<a title="VPN" href="http://www.csdn.net/tag/vpn" target="_blank" onclick="LogClickCount(this,336);">VPN</a>
+<a title="Spark" href="http://g.csdn.net/5272924" target="_blank" onclick="LogClickCount(this,336);">Spark</a>
+<a title="ERP" href="http://www.csdn.net/tag/erp" target="_blank" onclick="LogClickCount(this,336);">ERP</a>
+<a title="IE10" href="http://www.csdn.net/tag/ie10" target="_blank" onclick="LogClickCount(this,336);">IE10</a>
+<a title="Eclipse" href="http://www.csdn.net/tag/eclipse" target="_blank" onclick="LogClickCount(this,336);">Eclipse</a>
+<a title="CRM" href="http://www.csdn.net/tag/crm" target="_blank" onclick="LogClickCount(this,336);">CRM</a>
+<a title="JavaScript" href="http://www.csdn.net/tag/javascript" target="_blank" onclick="LogClickCount(this,336);">JavaScript</a>
+<a title="数据库" href="http://www.csdn.net/tag/%E6%95%B0%E6%8D%AE%E5%BA%93" target="_blank" onclick="LogClickCount(this,336);">数据库</a>
+<a title="Ubuntu" href="http://www.csdn.net/tag/ubuntu" target="_blank" onclick="LogClickCount(this,336);">Ubuntu</a>
+<a title="NFC" href="http://www.csdn.net/tag/nfc" target="_blank" onclick="LogClickCount(this,336);">NFC</a>
+<a title="WAP" href="http://www.csdn.net/tag/wap" target="_blank" onclick="LogClickCount(this,336);">WAP</a>
+<a title="jQuery" href="http://www.csdn.net/tag/jquery" target="_blank" onclick="LogClickCount(this,336);">jQuery</a>
+<a title="BI" href="http://www.csdn.net/tag/bi" target="_blank" onclick="LogClickCount(this,336);">BI</a>
+<a title="HTML5" href="http://www.csdn.net/tag/html5" target="_blank" onclick="LogClickCount(this,336);">HTML5</a>
+<a title="Spring" href="http://www.csdn.net/tag/spring" target="_blank" onclick="LogClickCount(this,336);">Spring</a>
+<a title="Apache" href="http://www.csdn.net/tag/apache" target="_blank" onclick="LogClickCount(this,336);">Apache</a>
+<a title=".NET" href="http://www.csdn.net/tag/.net" target="_blank" onclick="LogClickCount(this,336);">.NET</a>
+<a title="API" href="http://www.csdn.net/tag/api" target="_blank" onclick="LogClickCount(this,336);">API</a>
+<a title="HTML" href="http://www.csdn.net/tag/html" target="_blank" onclick="LogClickCount(this,336);">HTML</a>
+<a title="SDK" href="http://www.csdn.net/tag/sdk" target="_blank" onclick="LogClickCount(this,336);">SDK</a>
+<a title="IIS" href="http://www.csdn.net/tag/iis" target="_blank" onclick="LogClickCount(this,336);">IIS</a>
+<a title="Fedora" href="http://www.csdn.net/tag/fedora" target="_blank" onclick="LogClickCount(this,336);">Fedora</a>
+<a title="XML" href="http://www.csdn.net/tag/xml" target="_blank" onclick="LogClickCount(this,336);">XML</a>
+<a title="LBS" href="http://www.csdn.net/tag/lbs" target="_blank" onclick="LogClickCount(this,336);">LBS</a>
+<a title="Unity" href="http://www.csdn.net/tag/unity" target="_blank" onclick="LogClickCount(this,336);">Unity</a>
+<a title="Splashtop" href="http://www.csdn.net/tag/splashtop" target="_blank" onclick="LogClickCount(this,336);">Splashtop</a>
+<a title="UML" href="http://www.csdn.net/tag/uml" target="_blank" onclick="LogClickCount(this,336);">UML</a>
+<a title="components" href="http://www.csdn.net/tag/components" target="_blank" onclick="LogClickCount(this,336);">components</a>
+<a title="Windows Mobile" href="http://www.csdn.net/tag/windowsmobile" target="_blank" onclick="LogClickCount(this,336);">Windows Mobile</a>
+<a title="Rails" href="http://www.csdn.net/tag/rails" target="_blank" onclick="LogClickCount(this,336);">Rails</a>
+<a title="QEMU" href="http://www.csdn.net/tag/qemu" target="_blank" onclick="LogClickCount(this,336);">QEMU</a>
+<a title="KDE" href="http://www.csdn.net/tag/kde" target="_blank" onclick="LogClickCount(this,336);">KDE</a>
+<a title="Cassandra" href="http://www.csdn.net/tag/cassandra" target="_blank" onclick="LogClickCount(this,336);">Cassandra</a>
+<a title="CloudStack" href="http://www.csdn.net/tag/cloudstack" target="_blank" onclick="LogClickCount(this,336);">CloudStack</a>
+<a title="FTC" href="http://www.csdn.net/tag/ftc" target="_blank" onclick="LogClickCount(this,336);">FTC</a>
+<a title="coremail" href="http://www.csdn.net/tag/coremail" target="_blank" onclick="LogClickCount(this,336);">coremail</a>
+<a title="OPhone " href="http://www.csdn.net/tag/ophone" target="_blank" onclick="LogClickCount(this,336);">OPhone </a>
+<a title="CouchBase" href="http://www.csdn.net/tag/couchbase" target="_blank" onclick="LogClickCount(this,336);">CouchBase</a>
+<a title="云计算" href="http://www.csdn.net/tag/%E4%BA%91%E8%AE%A1%E7%AE%97" target="_blank" onclick="LogClickCount(this,336);">云计算</a>
+<a title="iOS6" href="http://www.csdn.net/tag/iOS6" target="_blank" onclick="LogClickCount(this,336);">iOS6</a>
+<a title="Rackspace " href="http://www.csdn.net/tag/rackspace" target="_blank" onclick="LogClickCount(this,336);">Rackspace </a>
+<a title="Web App" href="http://www.csdn.net/tag/webapp" target="_blank" onclick="LogClickCount(this,336);">Web App</a>
+<a title="SpringSide" href="http://www.csdn.net/tag/springside" target="_blank" onclick="LogClickCount(this,336);">SpringSide</a>
+<a title="Maemo" href="http://www.csdn.net/tag/maemo" target="_blank" onclick="LogClickCount(this,336);">Maemo</a>
+<a title="Compuware" href="http://www.csdn.net/tag/compuware" target="_blank" onclick="LogClickCount(this,336);">Compuware</a>
+<a title="大数据" href="http://www.csdn.net/tag/%E5%A4%A7%E6%95%B0%E6%8D%AE" target="_blank" onclick="LogClickCount(this,336);">大数据</a>
+<a title="aptech" href="http://www.csdn.net/tag/aptech" target="_blank" onclick="LogClickCount(this,336);">aptech</a>
+<a title="Perl" href="http://www.csdn.net/tag/perl" target="_blank" onclick="LogClickCount(this,336);">Perl</a>
+<a title="Tornado" href="http://www.csdn.net/tag/tornado" target="_blank" onclick="LogClickCount(this,336);">Tornado</a>
+<a title="Ruby" href="http://www.csdn.net/tag/ruby" target="_blank" onclick="LogClickCount(this,336);">Ruby</a>
+<a title="Hibernate" href="http://www.csdn.net/hibernate" target="_blank" onclick="LogClickCount(this,336);">Hibernate</a>
+<a title="ThinkPHP" href="http://www.csdn.net/tag/thinkphp" target="_blank" onclick="LogClickCount(this,336);">ThinkPHP</a>
+<a title="HBase" href="http://www.csdn.net/tag/hbase" target="_blank" onclick="LogClickCount(this,336);">HBase</a>
+<a title="Pure" href="http://www.csdn.net/tag/pure" target="_blank" onclick="LogClickCount(this,336);">Pure</a>
+<a title="Solr" href="http://www.csdn.net/tag/solr" target="_blank" onclick="LogClickCount(this,336);">Solr</a>
+<a title="Angular" href="http://www.csdn.net/tag/angular" target="_blank" onclick="LogClickCount(this,336);">Angular</a>
+<a title="Cloud Foundry" href="http://www.csdn.net/tag/cloudfoundry" target="_blank" onclick="LogClickCount(this,336);">Cloud Foundry</a>
+<a title="Redis" href="http://www.csdn.net/tag/redis" target="_blank" onclick="LogClickCount(this,336);">Redis</a>
+<a title="Scala" href="http://www.csdn.net/tag/scala" target="_blank" onclick="LogClickCount(this,336);">Scala</a>
+<a title="Django" href="http://www.csdn.net/tag/django" target="_blank" onclick="LogClickCount(this,336);">Django</a>
+<a title="Bootstrap" href="http://www.csdn.net/tag/bootstrap" target="_blank" onclick="LogClickCount(this,336);">Bootstrap</a>
+    </div>
+</div>
+
+
+                        <div class="clear">
+                        </div>
+                    </div>                   
+                
+            </div>
+            <div id="side">
+    <div class="side">
+<div id="panel_Profile" class="panel">
+<ul class="panel_head"><span>个人资料</span></ul>
+<ul class="panel_body profile">
+<div id="blog_userface">
+    <a href="http://my.csdn.net/chjttony" target="_blank">
+    <img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/1_chjttony.jpg" title="访问我的空间" style="max-width:90%">
+    </a>
+    <br>
+    <span><a href="http://my.csdn.net/chjttony" class="user_name" target="_blank">chjttony</a></span>
+</div>
+<div class="interact">
+<a href="javascript:void(0);" class="attent" id="span_add_follow" title="[加关注]" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_guanzhu&#39;])"></a>
+<a href="javascript:void(0);" class="letter" onclick="loginto(1)" title="[发私信]"></a>
+</div>
+<div id="blog_medal">
+<div id="bms_box"><a href="http://medal.blog.csdn.net/allmedal.aspx" target="_blank"><img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/holdon_s2.gif" onmouseover="m_over_m(this,0)" onmouseout="m_out_m()" alt=""></a></div></div>
+<ul id="blog_rank">
+    <li>访问：<span>382497次</span></li>
+    <li>积分：<span>5677分</span></li>
+    <li>排名：<span>第1185名</span></li>
+</ul>
+<ul id="blog_statistics">
+    <li>原创：<span>170篇</span></li>
+    <li>转载：<span>17篇</span></li>
+    <li>译文：<span>2篇</span></li>
+    <li>评论：<span>168条</span></li>
+</ul>
+</ul>
+</div>
+
+
+<div class="panel" id="panel_Search">
+    <ul class="panel_head"><span>文章搜索</span></ul>
+    <ul class="panel_body">
+        <form id="frmSearch" action="http://so.csdn.net/search" class="form_search" target="_blank">
+        <span><input id="inputSearch" type="text" class="blogsearch" title="请输入关键字"></span>
+        <input id="btnSubmit" type="button" value="搜索" title="search in blog">
+        <input type="hidden" name="q" id="inputQ">
+        <input type="hidden" name="t" value="blog">
+        <a id="btnSearchBlog" target="_blank"></a>
+        </form>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSubmit").click(function () {           
+            search();
+        });
+
+        $("#frmSearch").submit(function () {
+            search();
+            return false;
+        });
+
+        function search()
+        {
+            var url = "http://so.csdn.net/so/search/s.do?q=" + encodeURIComponent($("#inputSearch").val()) + "&u=" + username + "&t=blog";
+            window.location.href = url;
+        }   
+    });
+</script><div id="panel_Category" class="panel">
+<ul class="panel_head"><span>文章分类</span></ul>
+<ul class="panel_body">
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/733215" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">java技术</a><span>(125)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/740334" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">Linux</a><span>(6)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/811484" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">人文空间</a><span>(4)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/826722" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">其他</a><span>(6)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/751237" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">前台技术</a><span>(10)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/762303" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">数据库</a><span>(4)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/747891" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">项目管理</a><span>(5)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/1123642" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">设计模式</a><span>(22)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/1168539" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">JavaEE服务器</a><span>(8)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/1239946" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">Spring</a><span>(24)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/1239947" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">java虚拟机</a><span>(10)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/1239948" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">Thinking in java</a><span>(20)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/1311991" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">Effective java</a><span>(10)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/chjttony/article/category/1779129" onclick="_gaq.push([&#39;_trackEvent&#39;,&#39;function&#39;, &#39;onclick&#39;, &#39;blog_articles_wenzhangfenlei&#39;]); ">Java解惑</a><span>(8)</span>
+            </li>
+</ul>
+</div><div id="panel_Archive" class="panel">
+<ul class="panel_head"><span>文章存档</span></ul>
+<ul class="panel_body">
+<div id="archive_list"><li><a href="http://blog.csdn.net/chjttony/article/month/2014/03">2014年03月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2014/02">2014年02月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2014/01">2014年01月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2013/12">2013年12月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2013/11">2013年11月</a><span>(2)</span></li><span class="hidelist" style="display:none;"><li><a href="http://blog.csdn.net/chjttony/article/month/2013/10">2013年10月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2013/09">2013年09月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2013/01">2013年01月</a><span>(6)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2012/12">2012年12月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2012/09">2012年09月</a><span>(6)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2012/08">2012年08月</a><span>(7)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2012/07">2012年07月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2012/06">2012年06月</a><span>(7)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2012/05">2012年05月</a><span>(5)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2012/04">2012年04月</a><span>(20)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2012/01">2012年01月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/12">2011年12月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/11">2011年11月</a><span>(8)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/10">2011年10月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/09">2011年09月</a><span>(5)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/08">2011年08月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/07">2011年07月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/06">2011年06月</a><span>(10)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/05">2011年05月</a><span>(6)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/04">2011年04月</a><span>(11)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/03">2011年03月</a><span>(14)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/02">2011年02月</a><span>(4)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2011/01">2011年01月</a><span>(6)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2010/12">2010年12月</a><span>(14)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2010/11">2010年11月</a><span>(20)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2010/10">2010年10月</a><span>(8)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2010/09">2010年09月</a><span>(4)</span></li><li><a href="http://blog.csdn.net/chjttony/article/month/2010/08">2010年08月</a><span>(2)</span></li></span><div id="archive_list_button" class="list_closed">展开</div></div>
+</ul>
+</div>
+<div id="hotarticls" class="panel">
+<ul class="panel_head">
+    <span>       
+阅读排行    </span>
+</ul>
+
+<ul class="panel_body itemlist">
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6301523" title="Spring对注解(Annotation)处理源码分析1——扫描和读取Bean定义">Spring对注解(Annotation)处理源码分析1——扫描和读取Bean定义</a><span>(15428)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6026079" title="Spring学习笔记1——基础知识">Spring学习笔记1——基础知识</a><span>(14421)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6286144" title="Spring基于 Annotation 的简单介绍">Spring基于 Annotation 的简单介绍</a><span>(12872)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6086298" title="JPA学习笔记1——JPA基础">JPA学习笔记1——JPA基础</a><span>(10759)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6301591" title="Spring对注解(Annotation)处理源码分析2——解析和注入注解配置的资源">Spring对注解(Annotation)处理源码分析2——解析和注入注解配置的资源</a><span>(9854)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6005594" title="JavaMail学习笔记3——JavaMail 接收邮件">JavaMail学习笔记3——JavaMail 接收邮件</a><span>(9270)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6240457" title="IBM Websphere培训3——JVM相关参数配置和问题诊断">IBM Websphere培训3——JVM相关参数配置和问题诊断</a><span>(8887)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6248682" title="《Spring技术内幕》学习笔记1——IoC容器体系结构">《Spring技术内幕》学习笔记1——IoC容器体系结构</a><span>(8661)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/7181427" title="java NIO非阻塞方式的Socket编程">java NIO非阻塞方式的Socket编程</a><span>(6915)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6419934" title="《Spring技术内幕》学习笔记13——SqlMapClientTemplate对Ibatis的封装">《Spring技术内幕》学习笔记13——SqlMapClientTemplate对Ibatis的封装</a><span>(6036)</span>
+</li>
+</ul>
+</div>
+<div id="hotarticls2" class="panel">
+<ul class="panel_head"><span>评论排行</span></ul>
+<ul class="panel_body itemlist">
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6248682" title="《Spring技术内幕》学习笔记1——IoC容器体系结构">《Spring技术内幕》学习笔记1——IoC容器体系结构</a><span>(16)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6026079" title="Spring学习笔记1——基础知识">Spring学习笔记1——基础知识</a><span>(16)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6301523" title="Spring对注解(Annotation)处理源码分析1——扫描和读取Bean定义">Spring对注解(Annotation)处理源码分析1——扫描和读取Bean定义</a><span>(11)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6005235" title="JavaMail学习笔记2——JavaMail 发送邮件">JavaMail学习笔记2——JavaMail 发送邮件</a><span>(8)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6005594" title="JavaMail学习笔记3——JavaMail 接收邮件">JavaMail学习笔记3——JavaMail 接收邮件</a><span>(8)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/5994645" title="JavaMail学习笔记1——JavaMail基础知识">JavaMail学习笔记1——JavaMail基础知识</a><span>(6)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/5875176" title="JPA一对多关系，在一端更新所包含多端引用的问题">JPA一对多关系，在一端更新所包含多端引用的问题</a><span>(6)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6419934" title="《Spring技术内幕》学习笔记13——SqlMapClientTemplate对Ibatis的封装">《Spring技术内幕》学习笔记13——SqlMapClientTemplate对Ibatis的封装</a><span>(5)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/5885471" title="HTML页面禁用Enter键自动提交表单">HTML页面禁用Enter键自动提交表单</a><span>(5)</span>
+</li>
+<li>
+<a href="http://blog.csdn.net/chjttony/article/details/6341977" title="CSM(Certified Scrum Master)敏捷大师培训总结">CSM(Certified Scrum Master)敏捷大师培训总结</a><span>(5)</span>
+</li>
+</ul>
+</div>
+<div id="homepageArticles" class="panel tracking-ad" data-mod="popu_4">
+<ul class="panel_head"><span>推荐文章</span></ul>
+<ul class="panel_body" id="ad_commend"><iframe id="ad_frm_2" frameborder="0" scrolling="no" style="border-width: 0px; overflow: hidden; width: 195px; height: 200px; " src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ad.htm"></iframe></ul>
+</div>
+<script type="text/javascript">
+ new Ad(12, 'ad_commend');
+</script><div id="newcomments" class="panel">
+<ul class="panel_head"><span>最新评论</span></ul>
+<ul class="panel_body itemlist">
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/7433099#comments">设计模式2——Proxy设计模式</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/kobetmacone" class="user_name">whylen</a>:
+LZ能简单解释一下Proxy.newProxyInstance()的运行机制吗？
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/7426077#comments">设计模式1——Singleton设计模式</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/kobetmacone" class="user_name">whylen</a>:
+第一点的getInstance()也是多余的
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/7610483#comments">java中使用SAX读取和写出XML文件</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/Li_ableXiao" class="user_name">Li_ableXiao</a>:
+顶！！~
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/6301523#comments">Spring对注解(Annotation)处理源码分析1——扫描和读取Bean定义</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/lidaasky" class="user_name">李达_August</a>:
+很好，学习了
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/7909502#comments">《深入理解java虚拟机》学习笔记6——类加载机制</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/u010504064" class="user_name">程序男</a>:
+学习了
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/6704618#comments">《Java编程思想》学习笔记3——内部类</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/hanjiancanxue_liu" class="user_name">hanjiancanxue_liu</a>:
+讲的太好了!你上边方法定义内部类并返回内部类对象编译不通过，返回值类型不识别，方法内部类类型不能被外...
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/6278627#comments">《Spring技术内幕》学习笔记6——IoC容器的高级特性</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/zhainanchunchun" class="user_name">zhainanchunchun</a>:
+看完太爽了。。。
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/6026079#comments">Spring学习笔记1——基础知识</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/huangminwen2012" class="user_name">KevinHuangNo1</a>:
+使用属性的setter注入方式时，所注入的属性必须提供setter和getter方法setter方法...
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/7484315#comments">设计模式8——Builder设计模式</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/zhainanchunchun" class="user_name">zhainanchunchun</a>:
+NutritionFacts cocaCola = new NutritionFacts().Bui...
+    </p>
+    </li>
+    <li>
+   
+         <a href="http://blog.csdn.net/chjttony/article/details/8529814#comments">《Effective java》读书笔记9——线程并发</a>
+    <p style="margin:0px;"><a href="http://blog.csdn.net/ren_lj" class="user_name">蚂蚁大象</a>:
+public class StopThread{	private static boolean st...
+    </p>
+    </li>
+</ul>
+</div>
+    </div>
+    <div class="clear">
+    </div>
+</div>
+
+            <div class="clear">
+            </div>
+        </div>
+        
+
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/cnick.js"></script>
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/newblog.min.js"></script>
+
+
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/showblogmedal.ashx"></script>
+<script type="text/javascript">
+    document.write('<script type="text/javascript" src="http://csdnimg.cn/pubfooter/js/publib_footer.js?' + Math.floor(new Date() / 120000).toString(36) + '="></' + 'script>');
+</script><script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/publib_footer.js"></script><link rel="stylesheet" type="text/css" href="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/pub_footer_2012.css"><div id="pub_footerall" class="pub_footerall"><dl><dt></dt> <dd><a href="http://www.csdn.net/company/about.html" target="_blank">公司简介</a>|<a href="http://www.csdn.net/company/recruit.html" target="_blank">招贤纳士</a>|<a href="http://www.csdn.net/company/marketing.html" target="_blank">广告服务</a>|<a href="http://www.csdn.net/company/account.html" target="_blank">银行汇款帐号</a>|<a href="http://www.csdn.net/company/contact.html" target="_blank">联系方式</a>|<a href="http://www.csdn.net/company/statement.html" target="_blank">版权声明</a>|<a href="http://www.csdn.net/company/layer.html" target="_blank">法律顾问</a>|<a href="mailto:webmaster@csdn.net">问题报告</a>|<a target="_blank" href="http://www.csdn.net/friendlink.html">合作伙伴</a>|<a href="http://bbs.csdn.net/forums/Service" target="_blank">论坛反馈</a></dd><dd><a href="http://wpa.qq.com/msgrd?v=3&uin=2355263776&site=qq&menu=yes" target="_blank" class="qq">网站客服</a> <a href="http://wpa.qq.com/msgrd?v=3&uin=2251809102&site=qq&menu=yes" target="_blank" class="qq">杂志客服</a> <a href="http://e.weibo.com/csdnsupport/profile" target="_blank" class="weibo">微博客服</a> <a href="mailto:webmaster@csdn.net" class="email" title="联系邮箱">webmaster@csdn.net</a> <span class="phone" title="服务热线">400-600-2320</span></dd><dd>京&nbsp;ICP&nbsp;证&nbsp;070598&nbsp;号</dd><dd>北京创新乐知信息技术有限公司 版权所有</dd><dd>江苏乐知网络技术有限公司 提供商务支持</dd><dd>Copyright © 1999-2014, CSDN.NET, All Rights Reserved&nbsp;<a href="http://www.hd315.gov.cn/beian/view.asp?bianhao=010202001032100010" target="_blank"><img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/gongshang_logos.gif" alt="GongshangLogo" title=""></a></dd></dl></div><div id="note1" class="csdn_note" style="display:none; position:absolute; z-index:9999; width:440px">  <span class="notice_top_arrow"><span class="inner"></span></span>  <div class="box"></div></div><div class="csdn_notice_tip" style="display: none; position: absolute; z-index: 9990; width: 170px; ">  <iframe src="about:blank" frameborder="0" scrolling="no" style="z-index:-1;position:absolute;top:0;left:0;width:100%;height:100%;background:transparent"></iframe>  <div class="tip_text">您有<strong>0</strong>条新通知</div>  <a href="javascript:void 0" class="close2"></a></div><script id="noticeScript" type="text/javascript" btnid="header_notice_num" wrapid="note1" count="5" subcount="5" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/notify.js"></script>
+    <script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/login.js"></script>
+<script type="text/javascript">document.write("<img src=http://counter.csdn.net/pv.aspx?id=24 border=0 width=0 height=0>");</script><img src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/pv.aspx" border="0" width="0" height="0">
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/counter.js"></script><script type="text/javascript" charset="UTF-8" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/msg.popup.js"></script>
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ad-blog.js"></script><script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ad-ms954.js"></script>
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/ad-ms953_3.js"></script>
+
+<script type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/count.js"></script><iframe src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/logs.htm" frameborder="0" width="0" height="0"></iframe>
+<script type="text/javascript">
+    $(function () {
+        function __get_code_toolbar(snippet_id) {
+            return $("<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "' target='_blank' title='在CODE上查看代码片' style='text-indent:0;'><img src='https://code.csdn.net/assets/CODE_ico.png' width=12 height=12 alt='在CODE上查看代码片' style='position:relative;top:1px;left:2px;'/></a>"
+                    + "<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "/fork' target='_blank' title='派生到我的代码片'  style='text-indent:0;'><img src='https://code.csdn.net/assets/ico_fork.svg' width=12 height=12 alt='派生到我的代码片' style='position:relative;top:2px;left:2px;'/></a>");
+        }
+        
+        $("[code_snippet_id]").each(function () {
+            __s_id = $(this).attr("code_snippet_id");
+            if (__s_id != null && __s_id != "" && __s_id != 0 && parseInt(__s_id) > 70020) {
+                __code_tool = __get_code_toolbar(__s_id);
+                $(this).prev().find(".tools").append(__code_tool);
+            }
+        });
+    });
+</script>
+
+    </div>
+      <!--new top-->
+    
+    <script id="csdn-toolbar-id" btnid="header_notice_num" wrapid="note1" count="5" subcount="5" type="text/javascript" src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/toolbar.js"></script>
+     <!--new top-->
+
+
+<div id="tag-suggest-pop" style="display: none; ">
+  <div class="relative">
+    <div class="close"></div>
+    <div class="content"><div><span>更多相关资源：</span><a href="http://www.csdn.net/tag/spring" title="关于 spring 的主题" target="_blank">spring</a><a href="http://www.csdn.net/tag/%E7%B1%BB" title="关于 类 的主题" target="_blank">类</a></div></div>
+  </div>
+</div><iframe style="width: 1px; height: 1px; position: absolute; visibility: hidden; " src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/langchao-database-homepage-zhiding-banner-960-90-25k.htm"></iframe><iframe style="width: 1px; height: 1px; position: absolute; visibility: hidden; " src="./《Spring技术内幕》学习笔记3——IoC容器载入Bean定义资源文件 - Tony Chen的专栏 - 博客频道 - CSDN.NET_files/langchao-fuwuqi-daohangtiaoxia-banner-960-90-25k.htm"></iframe></body></html>
