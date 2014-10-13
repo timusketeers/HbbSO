@@ -1,0 +1,82 @@
+<project name="hbb-so" basedir="." default="all">
+      <property name="name" value="hbb-so"/>
+      <property name="src.dir" value="src"/>
+	  <property name="build.dir.classes" value="classes"/>
+	  <property name="proj.home" value="."></property>
+	  <property name="proj.ref.lib.dir" value="lib"></property>
+	  <property name="proj.bin.dir" value="bin"></property>
+      <property name="proj.plugins" value="plugins"></property>
+      <property name="build.dir" value="build"/>
+	  <property name="build.dir.project" value="${build.dir}/${name}"></property>
+	  
+      <target name="clean" description="clean...">
+          <delete dir="${build.dir}"/>
+      </target>
+	  
+      <target name="init" description="init...">
+      	  <mkdir dir="${build.dir}"/>
+      	  <mkdir dir="${build.dir.project}"/>
+      	  <mkdir dir="${build.dir.project}/bin"/>
+      	  <mkdir dir="${build.dir.project}/classes"/>
+      	  <mkdir dir="${build.dir.project}/lib"/>
+      	  <mkdir dir="${build.dir.project}/logs"/>
+      	  <mkdir dir="${build.dir.project}/plugins"/>
+      	
+      	  <copy todir="${build.dir.project}/bin">
+		  	  <fileset dir="${proj.bin.dir}">
+		  	  	  <include name="**/*"/>
+		  	  </fileset>
+      	  </copy>
+      	
+      	  <copy todir="${build.dir.project}/lib">
+      	  	  <fileset dir="${proj.ref.lib.dir}">
+      	  		  <include name="*.jar"/>
+      	  	  </fileset>
+      	  </copy>
+      	
+	  	  <copy todir="${build.dir.project}/classes">
+    	  	  <fileset dir="${build.dir.classes}">
+    	  	  	  <include name="**/*"/>
+    	  	  </fileset>
+    	  </copy>
+      	  
+      	  <copy todir="${build.dir.project}/plugins">
+    	  	  <fileset dir="${proj.plugins}">
+    	  	  	  <include name="**/*"/>
+    	  	  </fileset>
+    	  </copy>
+      	
+      	 <copy todir="${build.dir.project}">
+		  	  <fileset dir="${proj.home}">
+		  	  	  <include name="log4j.properties"/>
+		  	  </fileset>
+      	  </copy>
+      	  
+	  </target>
+	
+      <target name="jarHbbSO" depends="init" description="Jar HbbSO...">
+      	  <jar jarfile="${build.dir.project}/bin/${name}.jar" basedir="${build.dir.project}/classes">  
+	      	  <manifest>  
+	              <attribute name="Main-class" value="com.howbuy.framework.SystemInitializer"/>  
+	      	  	  <attribute name="Class-Path" value="../lib/*.jar"/>  
+	          </manifest>
+      	 	 <include name="**/*.class"/>
+      	  </jar>
+      </target>
+	
+	  <target name="packageZip" depends="jarHbbSO" description="package the application">
+	      <zip destfile="${build.dir}/${name}.zip" basedir="${build.dir.project}">
+	      	  <exclude name="classes" />
+	      	  <exclude name="classes/**/*" />
+	      </zip>
+	  </target>
+	
+    <target name="DEL.SVN">  
+        <echo message="Delete *.svn file and folder"></echo>  
+        <delete verbose="true" includeemptydirs="true">  
+            <fileset dir="." includes="**/.svn/" defaultexcludes="false"/>  
+        </delete>  
+    </target>  
+
+      <target name="all" depends="clean,init,jarHbbSO,packageZip" description="clean,init,jarHbbSO,packageZip"/>
+</project>
