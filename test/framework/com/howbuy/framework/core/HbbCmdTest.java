@@ -21,7 +21,7 @@ public class HbbCmdTest
             @Override
             public void run()
             {
-                HbbCmd.execHbb("fds-online", "hbb_div");
+                HbbCmd.execHbb("jso-fds-clearing", "hbb_cleardisack");
             }
         });
         
